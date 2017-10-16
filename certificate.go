@@ -22,7 +22,7 @@ func getCertsJSON(p12 []byte) (string, error) {
 	return string(b), nil
 }
 
-func certFromContent(w http.ResponseWriter, r *http.Request) {
+func CertFromContent(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -48,7 +48,7 @@ func certFromContent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func certFromURL(w http.ResponseWriter, r *http.Request) {
+func CertFromURL(w http.ResponseWriter, r *http.Request) {
 	url, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

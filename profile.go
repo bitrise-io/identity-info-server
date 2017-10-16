@@ -40,7 +40,7 @@ func getProfileJSON(profile []byte) (string, error) {
 	return string(str), nil
 }
 
-func profFromContent(w http.ResponseWriter, r *http.Request) {
+func ProfFromContent(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -67,7 +67,7 @@ func profFromContent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func profFromURL(w http.ResponseWriter, r *http.Request) {
+func ProfFromURL(w http.ResponseWriter, r *http.Request) {
 	url, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

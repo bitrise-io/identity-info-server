@@ -10,10 +10,10 @@ import (
 
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/certificate/url", certFromURL).Methods("POST")
-	router.HandleFunc("/certificate", certFromContent).Methods("POST")
-	router.HandleFunc("/profile/url", profFromURL).Methods("POST")
-	router.HandleFunc("/profile", profFromContent).Methods("POST")
+	router.HandleFunc("/certificate/url", CertFromURL).Methods("POST")
+	router.HandleFunc("/certificate", CertFromContent).Methods("POST")
+	router.HandleFunc("/profile/url", ProfFromURL).Methods("POST")
+	router.HandleFunc("/profile", ProfFromContent).Methods("POST")
 	router.HandleFunc("/", index).Methods("GET")
 
 	if err := http.ListenAndServe(":"+os.Getenv("PORT"), router); err != nil {
