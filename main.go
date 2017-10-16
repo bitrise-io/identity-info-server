@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/bitrise-io/go-utils/command"
 	"github.com/gorilla/mux"
 	"github.com/trapacska/certificate-info/pkcs"
 )
@@ -24,6 +25,13 @@ func getCertsJSON(p12 []byte) (string, error) {
 	return string(b), nil
 }
 
+// func decodeProvProfile(profile []byte) (string, error) {
+
+// 	decoder := plist.NewDecoder(bytes.NewReader(profile)).Decode()
+
+// 	return "", nil
+// }
+
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", index).Methods("GET")
@@ -36,7 +44,13 @@ func main() {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome!")
+	cmd := command.New("openssl", "version")
+	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
+	if err != nil {
+		fmt.Fprintln(w, "Bad! ")
+		return
+	}
+	fmt.Fprintln(w, out)
 }
 
 func certFromContent(w http.ResponseWriter, r *http.Request) {
