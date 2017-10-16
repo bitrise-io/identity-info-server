@@ -27,8 +27,8 @@ func getCertsJSON(p12 []byte) (string, error) {
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", index).Methods("GET")
-	router.HandleFunc("/content/url", fromURL).Methods("POST")
-	router.HandleFunc("/content", fromContent).Methods("POST")
+	router.HandleFunc("/certificate/url", certFromURL).Methods("POST")
+	router.HandleFunc("/certificate", certFromContent).Methods("POST")
 
 	if err := http.ListenAndServe(":"+os.Getenv("PORT"), router); err != nil {
 		fmt.Printf("Failed to listen, error: %s\n", err)
@@ -39,7 +39,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome!")
 }
 
-func fromContent(w http.ResponseWriter, r *http.Request) {
+func certFromContent(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -69,7 +69,7 @@ func fromContent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func fromURL(w http.ResponseWriter, r *http.Request) {
+func certFromURL(w http.ResponseWriter, r *http.Request) {
 	url, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
