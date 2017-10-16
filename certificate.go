@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/bitrise-steplib/test/pkcs"
+	"github.com/trapacska/certificate-info/pkcs"
 )
 
 func getCertsJSON(p12 []byte) (string, error) {

@@ -7,6 +7,10 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/DHowett/go-plist",
+			"Rev": "f00f32b327ca6ad11a7c53d9ccc34d031b3795b8"
+		},
+		{
 			"ImportPath": "github.com/bitrise-io/go-utils/command",
 			"Rev": "4ea9c35054b7f8cce3940bf73b5dcd395e9c9226"
 		},
