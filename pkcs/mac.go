@@ -35,7 +35,10 @@ func verifyMac(macData *macData, message, password []byte) error {
 	key := pbkdf(sha1Sum, 20, 64, macData.MacSalt, password, macData.Iterations, 3, 20)
 
 	mac := hmac.New(sha1.New, key)
-	mac.Write(message)
+	_, err := mac.Write(message)
+	if err != nil {
+		return err
+	}
 	expectedMAC := mac.Sum(nil)
 
 	if !hmac.Equal(macData.Mac.Digest, expectedMAC) {

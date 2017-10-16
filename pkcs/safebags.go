@@ -18,7 +18,7 @@ var (
 )
 
 type certBag struct {
-	Id   asn1.ObjectIdentifier
+	ID   asn1.ObjectIdentifier
 	Data []byte `asn1:"tag:0,explicit"`
 }
 
@@ -50,7 +50,7 @@ func decodeCertBag(asn1Data []byte) (x509Certificates []byte, err error) {
 	if err := unmarshal(asn1Data, bag); err != nil {
 		return nil, errors.New("pkcs12: error decoding cert bag: " + err.Error())
 	}
-	if !bag.Id.Equal(oidCertTypeX509Certificate) {
+	if !bag.ID.Equal(oidCertTypeX509Certificate) {
 		return nil, NotImplementedError("only X509 certificates are supported")
 	}
 	return bag.Data, nil

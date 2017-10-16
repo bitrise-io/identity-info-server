@@ -43,14 +43,22 @@ func fromContent(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf(`{"error":"Failed to read body: %s"}`, err)))
+		_, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to read body: %s"}`, err)))
+		if err != nil {
+			fmt.Printf("Failed to write response, error: %s\n", err)
+			return
+		}
 		return
 	}
 
 	certsJSON, err := getCertsJSON(body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error":"Failed to get certificate info"}`))
+		_, err = w.Write([]byte(`{"error":"Failed to get certificate info"}`))
+		if err != nil {
+			fmt.Printf("Failed to write response, error: %s\n", err)
+			return
+		}
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -65,27 +73,43 @@ func fromURL(w http.ResponseWriter, r *http.Request) {
 	url, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf(`{"error":"Failed to read body: %s"}`, err)))
+		_, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to read body: %s"}`, err)))
+		if err != nil {
+			fmt.Printf("Failed to write response, error: %s\n", err)
+			return
+		}
 		return
 	}
 
 	response, err := http.Get(string(url))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error":"Failed to create request for the given URL"}`))
+		_, err = w.Write([]byte(`{"error":"Failed to create request for the given URL"}`))
+		if err != nil {
+			fmt.Printf("Failed to write response, error: %s\n", err)
+			return
+		}
 		return
 	}
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf(`{"error":"Failed to get data from the given url: %s"}`, err)))
+		_, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to get data from the given url: %s"}`, err)))
+		if err != nil {
+			fmt.Printf("Failed to write response, error: %s\n", err)
+			return
+		}
 		return
 	}
 
 	certsJSON, err := getCertsJSON(body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error":"Failed to get certificate info"}`))
+		_, err = w.Write([]byte(`{"error":"Failed to get certificate info"}`))
+		if err != nil {
+			fmt.Printf("Failed to write response, error: %s\n", err)
+			return
+		}
 		return
 	}
 	w.WriteHeader(http.StatusOK)

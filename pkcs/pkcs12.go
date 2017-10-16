@@ -1,12 +1,3 @@
-// Copyright 2015 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-// package pkcs implements some of PKCS#12.
-//
-// This implementation is distilled from https://tools.ietf.org/html/rfc7292
-// and referenced documents. It is intended for decoding P12/PFX-stored
-// certificates and keys for use with the crypto/tls package.
 package pkcs
 
 import (
@@ -58,13 +49,13 @@ func (i encryptedContentInfo) Algorithm() pkix.AlgorithmIdentifier {
 func (i encryptedContentInfo) Data() []byte { return i.EncryptedContent }
 
 type safeBag struct {
-	Id         asn1.ObjectIdentifier
+	ID         asn1.ObjectIdentifier
 	Value      asn1.RawValue     `asn1:"tag:0,explicit"`
 	Attributes []pkcs12Attribute `asn1:"set,optional"`
 }
 
 type pkcs12Attribute struct {
-	Id    asn1.ObjectIdentifier
+	ID    asn1.ObjectIdentifier
 	Value asn1.RawValue `asn1:"set"`
 }
 
@@ -114,14 +105,14 @@ func convertBag(bag *safeBag, password []byte) (*pem.Block, error) {
 	}
 
 	switch {
-	case bag.Id.Equal(oidCertBag):
+	case bag.ID.Equal(oidCertBag):
 		block.Type = certificateType
 		certsData, err := decodeCertBag(bag.Value.Bytes)
 		if err != nil {
 			return nil, err
 		}
 		block.Bytes = certsData
-	case bag.Id.Equal(oidPKCS8ShroundedKeyBag):
+	case bag.ID.Equal(oidPKCS8ShroundedKeyBag):
 		block.Type = privateKeyType
 
 		key, err := decodePkcs8ShroudedKeyBag(bag.Value.Bytes, password)
@@ -141,7 +132,7 @@ func convertBag(bag *safeBag, password []byte) (*pem.Block, error) {
 			return nil, errors.New("found unknown private key type in PKCS#8 wrapping")
 		}
 	default:
-		return nil, errors.New("don't know how to convert a safe bag of type " + bag.Id.String())
+		return nil, errors.New("don't know how to convert a safe bag of type " + bag.ID.String())
 	}
 	return block, nil
 }
@@ -150,17 +141,17 @@ func convertAttribute(attribute *pkcs12Attribute) (key, value string, err error)
 	isString := false
 
 	switch {
-	case attribute.Id.Equal(oidFriendlyName):
+	case attribute.ID.Equal(oidFriendlyName):
 		key = "friendlyName"
 		isString = true
-	case attribute.Id.Equal(oidLocalKeyID):
+	case attribute.ID.Equal(oidLocalKeyID):
 		key = "localKeyId"
-	case attribute.Id.Equal(oidMicrosoftCSPName):
+	case attribute.ID.Equal(oidMicrosoftCSPName):
 		// This key is chosen to match OpenSSL.
 		key = "Microsoft CSP Name"
 		isString = true
 	default:
-		return "", "", errors.New("pkcs12: unknown attribute with OID " + attribute.Id.String())
+		return "", "", errors.New("pkcs12: unknown attribute with OID " + attribute.ID.String())
 	}
 
 	if isString {
@@ -181,7 +172,7 @@ func convertAttribute(attribute *pkcs12Attribute) (key, value string, err error)
 	return key, value, nil
 }
 
-// Decode extracts a certificate and private key from pfxData. This function
+// DecodeAllCerts extracts a certificate and private key from pfxData. This function
 // assumes that there is only one certificate and only one private key in the
 // pfxData.
 func DecodeAllCerts(pfxData []byte, password string) (certificates []*x509.Certificate, err error) {
@@ -204,7 +195,7 @@ func DecodeAllCerts(pfxData []byte, password string) (certificates []*x509.Certi
 
 	for _, bag := range bags {
 		switch {
-		case bag.Id.Equal(oidCertBag):
+		case bag.ID.Equal(oidCertBag):
 			// if certificate != nil {
 			// 	err = errors.New("pkcs12: expected exactly one certificate bag")
 			// }

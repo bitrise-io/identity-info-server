@@ -1,14 +1,3 @@
-// Copyright 2015 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-// Package rc2 implements the RC2 cipher
-/*
-https://www.ietf.org/rfc/rfc2268.txt
-http://people.csail.mit.edu/rivest/pubs/KRRR98.pdf
-
-This code is licensed under the MIT license.
-*/
 package rc22
 
 import (
@@ -16,7 +5,7 @@ import (
 	"encoding/binary"
 )
 
-// The rc2 block size in bytes
+// BlockSize ...
 const BlockSize = 8
 
 type rc2Cipher struct {
