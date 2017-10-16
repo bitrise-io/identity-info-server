@@ -115,7 +115,7 @@ func certFromURL(w http.ResponseWriter, r *http.Request) {
 }
 
 func getProfileJSON(profile []byte) (string, error) {
-	cmd := command.New("openssl", "smime", "-inform", "der", "-verify")
+	cmd := command.New("openssl", "smime", "-inform", "der", "-verify", "-CAfile", "./misc/CA.pem")
 	cmd.SetStdin(strings.NewReader(string(profile)))
 
 	var b bytes.Buffer
