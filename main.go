@@ -119,11 +119,13 @@ func getProfileJSON(profile []byte) (string, error) {
 	cmd.SetStdin(strings.NewReader(string(profile)))
 
 	var b bytes.Buffer
+	var berr bytes.Buffer
 	cmd.SetStdout(&b)
+	cmd.SetStderr(&berr)
 
 	err := cmd.Run()
 	if err != nil {
-		return "", fmt.Errorf("%s - %s", string(b.Bytes()), err)
+		return "", fmt.Errorf("%s - %s", string(berr.Bytes()), err)
 	}
 
 	var intf interface{}
