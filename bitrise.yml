@@ -1,10 +1,29 @@
 format_version: "3"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
+app:
+  envs:
+  - PORT: $PORT
+  - AES256_SECRET_KEY: $AES256_SECRET_KEY
+
 workflows:
+  up:
+    steps:
+    - script:
+        title: Start server
+        inputs:
+        - content: |-
+            #!/bin/bash
+            go run main.go
   test:
     before_run:
     - _install-test-tools
+    envs:
+    - TEST_PROFILE_PATH: $TEST_PROFILE_PATH
+    - TEST1_CERTIFICATE_PATH: $TEST1_CERTIFICATE_PATH
+    - TEST1_CERTIFICATE_PASSWORD: $TEST1_CERTIFICATE_PASSWORD
+    - TEST2_CERTIFICATE_PATH: $TEST2_CERTIFICATE_PATH
+    - TEST2_CERTIFICATE_PASSWORD: $TEST2_CERTIFICATE_PASSWORD
     steps:
     - script:
         title: Export go files to test

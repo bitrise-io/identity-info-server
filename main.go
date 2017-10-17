@@ -2,12 +2,14 @@ package main
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
-	"strings"
 
 	plist "github.com/DHowett/go-plist"
 	"github.com/bitrise-io/go-utils/command"
@@ -15,111 +17,87 @@ import (
 	"github.com/trapacska/certificate-info/pkcs"
 )
 
-func main() {
-	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/certificate/url", certFromURL).Methods("POST")
-	router.HandleFunc("/certificate", certFromContent).Methods("POST")
-	router.HandleFunc("/profile/url", profFromURL).Methods("POST")
-	router.HandleFunc("/profile", profFromContent).Methods("POST")
-	router.HandleFunc("/", index).Methods("GET")
+// RequestModel ...
+type RequestModel struct {
+	Data []byte `json:"data"`
+	Key  []byte `json:"key"`
+}
 
-	if err := http.ListenAndServe(":"+os.Getenv("PORT"), router); err != nil {
-		fmt.Printf("Failed to listen, error: %s\n", err)
+//
+// CONFIG
+
+// Configs ...
+type Configs struct {
+	Port   string
+	Secret string
+}
+
+// NewConfig ...
+func NewConfig() (*Configs, error) {
+	port := os.Getenv("PORT")
+	if port == "" {
+		return nil, fmt.Errorf("No PORT specified")
+	}
+
+	secret := os.Getenv("AES256_SECRET_KEY")
+	if secret == "" {
+		return nil, fmt.Errorf("No AES256_SECRET_KEY specified")
+	}
+
+	if len(secret) != 32 {
+		return nil, fmt.Errorf("Invalid AES256_SECRET_KEY length: %d, required: %d", len(secret), 32)
+	}
+
+	return &Configs{
+		Port:   port,
+		Secret: secret,
+	}, nil
+}
+
+//
+// MISC
+
+func errorResponse(w http.ResponseWriter, f string, v ...interface{}) {
+	w.WriteHeader(http.StatusBadRequest)
+	if _, err := w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, fmt.Sprintf(f, v)))); err != nil {
+		logCritical("Failed to write response, error: %+v\n", err)
 	}
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome!")
+func logCritical(f string, v ...interface{}) {
+	fmt.Printf("[!] Exception: %s\n", fmt.Sprintf(f, v))
 }
 
-func getCertsJSON(p12 []byte) (string, error) {
-	certs, err := pkcs.DecodeAllCerts(p12, "")
+func decryptData(ciphertext, key []byte) ([]byte, error) {
+	c, err := aes.NewCipher(key)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	b, err := json.Marshal(certs)
+	gcm, err := cipher.NewGCM(c)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(b), nil
+
+	nonceSize := gcm.NonceSize()
+	if len(ciphertext) < nonceSize {
+		return nil, fmt.Errorf("ciphertext too short %d - %d", len(ciphertext), nonceSize)
+	}
+
+	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+	return gcm.Open(nil, nonce, ciphertext, nil)
 }
 
-func certFromContent(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		if _, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to read body: %s"}`, err))); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
-		fmt.Printf("Failed to read body, error: %s\n", err)
-		return
-	}
-
-	certsJSON, err := getCertsJSON(body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		if _, err = w.Write([]byte(`{"error":"Failed to get certificate info"}`)); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
-		fmt.Printf("Failed to get certificate info, error: %s\n", err)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	if _, err = w.Write([]byte(certsJSON)); err != nil {
-		fmt.Printf("Failed to write response, error: %s\n", err)
-	}
+func isValidURL(reqURL string) bool {
+	_, err := url.ParseRequestURI(reqURL)
+	return (err == nil)
 }
 
-func certFromURL(w http.ResponseWriter, r *http.Request) {
-	url, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		if _, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to read body: %s"}`, err))); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
-		fmt.Printf("Failed to read body, error: %s\n", err)
-		return
-	}
-
-	response, err := http.Get(string(url))
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		if _, err = w.Write([]byte(`{"error":"Failed to create request for the given URL"}`)); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
-		return
-	}
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		if _, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to get data from the given url: %s"}`, err))); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
-		fmt.Printf("Failed to get data from the given url, error: %s\n", err)
-		return
-	}
-
-	certsJSON, err := getCertsJSON(body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		if _, err = w.Write([]byte(`{"error":"Failed to get certificate info"}`)); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	if _, err = w.Write([]byte(certsJSON)); err != nil {
-		fmt.Printf("Failed to write response, error: %s\n", err)
-	}
-}
-
-func getProfileJSON(profile []byte) (string, error) {
+func profileToJSON(profile []byte) (string, error) {
 	cmd := command.New("openssl", "smime", "-inform", "der", "-verify", "-noverify")
-	cmd.SetStdin(strings.NewReader(string(profile)))
+	cmd.SetStdin(bytes.NewReader(profile))
 
-	var b bytes.Buffer
-	var berr bytes.Buffer
+	var b, berr bytes.Buffer
 	cmd.SetStdout(&b)
 	cmd.SetStderr(&berr)
 
@@ -144,76 +122,116 @@ func getProfileJSON(profile []byte) (string, error) {
 	return string(str), nil
 }
 
-func profFromContent(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+func certificateToJSON(p12, key []byte) (string, error) {
+	certs, err := pkcs.DecodeAllCerts(p12, string(key))
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Printf("Failed to read body, error: %s\n", err)
-		if _, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to read body: %s"}`, err))); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
-		return
+		return "", err
 	}
 
-	profJSON, err := getProfileJSON(body)
+	b, err := json.Marshal(certs)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Printf("Failed to get profile info, error: %s\n", err)
-		if _, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to get profile info: %s"}`, err))); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
-		return
+		return "", err
+	}
+	return string(b), nil
+}
+
+func getDecryptedDataFromResponse(r *http.Request, secret []byte) (RequestModel, error) {
+	request := RequestModel{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		return RequestModel{}, fmt.Errorf("Failed to decode body to JSON, error: %s", err)
 	}
 
-	w.WriteHeader(http.StatusOK)
-	if _, err = w.Write([]byte(profJSON)); err != nil {
-		fmt.Printf("Failed to write response, error: %s\n", err)
+	dataDecrypted, err := decryptData(request.Data, secret)
+	if err != nil {
+		return RequestModel{}, fmt.Errorf("Failed to decrypt body, error: %s", err)
+	}
+	request.Data = dataDecrypted
+
+	if len(request.Key) != 0 {
+		keyDecrypted, err := decryptData(request.Key, secret)
+		if err != nil {
+			return RequestModel{}, fmt.Errorf("Failed to decrypt body, error: %s", err)
+		}
+		request.Key = keyDecrypted
+	}
+
+	if isValidURL(string(request.Data)) {
+		response, err := http.Get(string(request.Data))
+		if err != nil {
+			return RequestModel{}, fmt.Errorf("Failed to create request for the given URL, error: %s", err)
+		}
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return RequestModel{}, fmt.Errorf("Failed to read body, error: %s", err)
+		}
+		request.Data = body
+	}
+
+	return request, nil
+}
+
+//
+// HANDLERS
+
+func index(w http.ResponseWriter, r *http.Request) {
+	if err := json.NewEncoder(w).Encode(map[string]string{"message": "Welcome!"}); err != nil {
+		logCritical("Failed to write response, error: %+v", err)
 	}
 }
 
-func profFromURL(w http.ResponseWriter, r *http.Request) {
-	url, err := ioutil.ReadAll(r.Body)
+func (configs *Configs) handlerCertificate(w http.ResponseWriter, r *http.Request) {
+	decryptedData, err := getDecryptedDataFromResponse(r, []byte(configs.Secret))
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		if _, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to read body: %s"}`, err))); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
-		fmt.Printf("Failed to read body, error: %s\n", err)
+		errorResponse(w, "Failed to decrypt request body, error: %s", err)
 		return
 	}
 
-	response, err := http.Get(string(url))
+	certsJSON, err := certificateToJSON(decryptedData.Data, decryptedData.Key)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Printf("Failed to create request for the given URL, error: %s\n", err)
-		if _, err = w.Write([]byte(`{"error":"Failed to create request for the given URL"}`)); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
+		errorResponse(w, "Failed to get certificate info, error: %s", err)
 		return
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	w.WriteHeader(http.StatusOK)
+	if _, err = w.Write([]byte(certsJSON)); err != nil {
+		logCritical("Failed to write response, error: %+v", err)
+	}
+}
+
+func (configs *Configs) handlerProfile(w http.ResponseWriter, r *http.Request) {
+	decryptedData, err := getDecryptedDataFromResponse(r, []byte(configs.Secret))
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Printf("Failed to read body, error: %s\n", err)
-		if _, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to read body: %s"}`, err))); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
+		errorResponse(w, "Failed to decrypt request body, error: %s", err)
 		return
 	}
 
-	profJSON, err := getProfileJSON(body)
+	profJSON, err := profileToJSON(decryptedData.Data)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Printf("Failed to get profile info, error: %s\n", err)
-		if _, err = w.Write([]byte(fmt.Sprintf(`{"error":"Failed to get profile info: %s"}`, err))); err != nil {
-			fmt.Printf("Failed to write response, error: %s\n", err)
-		}
+		errorResponse(w, "Failed to get profile info, error: %s", err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	if _, err = w.Write([]byte(profJSON)); err != nil {
-		fmt.Printf("Failed to write response, error: %s\n", err)
+		fmt.Printf("Failed to write response, error: %+v", err)
+	}
+}
+
+func main() {
+	config, err := NewConfig()
+	if err != nil {
+		logCritical("Failed to create configs, error: %s", err)
+		return
+	}
+
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/certificate", config.handlerCertificate).Methods("POST")
+	router.HandleFunc("/profile", config.handlerProfile).Methods("POST")
+	router.HandleFunc("/", index).Methods("GET")
+
+	if err := http.ListenAndServe(":"+config.Port, router); err != nil {
+		logCritical("Failed to listen, error: %s", err)
+		return
 	}
 }
