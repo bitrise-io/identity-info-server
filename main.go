@@ -19,37 +19,6 @@ import (
 )
 
 //
-// CONFIG
-
-// Configs ...
-type Configs struct {
-	Port   string
-	Secret string
-}
-
-// NewConfig ...
-func NewConfig() (*Configs, error) {
-	port := os.Getenv("PORT")
-	if port == "" {
-		return nil, fmt.Errorf("No PORT specified")
-	}
-
-	secret := os.Getenv("AES256_SECRET_KEY")
-	if secret == "" {
-		return nil, fmt.Errorf("No AES256_SECRET_KEY specified")
-	}
-
-	if len(secret) != 32 {
-		return nil, fmt.Errorf("Invalid AES256_SECRET_KEY length: %d, required: %d", len(secret), 32)
-	}
-
-	return &Configs{
-		Port:   port,
-		Secret: secret,
-	}, nil
-}
-
-//
 // MISC
 
 // RequestModel ...
@@ -144,23 +113,11 @@ func certificateToJSON(p12, key []byte) (string, error) {
 	return string(b), nil
 }
 
-func getDecryptedDataFromResponse(r *http.Request, secret []byte) (RequestModel, error) {
+func getDataFromResponse(r *http.Request) (RequestModel, error) {
 	request := RequestModel{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		return RequestModel{}, fmt.Errorf("Failed to decode body to JSON, error: %s", err)
-	}
-
-	request.Data, err = decryptData(request.Data, secret)
-	if err != nil {
-		return RequestModel{}, fmt.Errorf("Failed to decrypt body, error: %s", err)
-	}
-
-	if len(request.Key) != 0 {
-		request.Key, err = decryptData(request.Key, secret)
-		if err != nil {
-			return RequestModel{}, fmt.Errorf("Failed to decrypt body, error: %s", err)
-		}
 	}
 
 	if isValidURL(string(request.Data)) {
@@ -186,14 +143,14 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (configs *Configs) handlerCertificate(w http.ResponseWriter, r *http.Request) {
-	decryptedData, err := getDecryptedDataFromResponse(r, []byte(configs.Secret))
+func handlerCertificate(w http.ResponseWriter, r *http.Request) {
+	data, err := getDataFromResponse(r)
 	if err != nil {
 		errorResponse(w, "Failed to decrypt request body, error: %s", err)
 		return
 	}
 
-	certsJSON, err := certificateToJSON(decryptedData.Data, decryptedData.Key)
+	certsJSON, err := certificateToJSON(data.Data, data.Key)
 	if err != nil {
 		errorResponse(w, "Failed to get certificate info, error: %s", err)
 		return
@@ -205,14 +162,14 @@ func (configs *Configs) handlerCertificate(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (configs *Configs) handlerProfile(w http.ResponseWriter, r *http.Request) {
-	decryptedData, err := getDecryptedDataFromResponse(r, []byte(configs.Secret))
+func handlerProfile(w http.ResponseWriter, r *http.Request) {
+	data, err := getDataFromResponse(r)
 	if err != nil {
 		errorResponse(w, "Failed to decrypt request body, error: %s", err)
 		return
 	}
 
-	profJSON, err := profileToJSON(decryptedData.Data)
+	profJSON, err := profileToJSON(data.Data)
 	if err != nil {
 		errorResponse(w, "Failed to get profile info, error: %s", err)
 		return
@@ -225,18 +182,18 @@ func (configs *Configs) handlerProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	config, err := NewConfig()
-	if err != nil {
-		logCritical("Failed to create configs, error: %s", err)
+	port := os.Getenv("PORT")
+	if port == "" {
+		logCritical("No PORT specified")
 		return
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/certificate", config.handlerCertificate).Methods("POST")
-	router.HandleFunc("/profile", config.handlerProfile).Methods("POST")
+	router.HandleFunc("/certificate", handlerCertificate).Methods("POST")
+	router.HandleFunc("/profile", handlerProfile).Methods("POST")
 	router.HandleFunc("/", index).Methods("GET")
 
-	if err := http.ListenAndServe(":"+config.Port, router); err != nil {
+	if err := http.ListenAndServe(":"+port, router); err != nil {
 		logCritical("Failed to listen, error: %s", err)
 		return
 	}
