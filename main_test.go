@@ -14,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bitrise-io/go-utils/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -78,8 +77,6 @@ func TestEndpoints(t *testing.T) {
 		fmt.Printf(string(bodyBytes))
 
 		require.Equal(t, 200, resp.StatusCode)
-
-		require.FailNow(t, "ok")
 	}
 
 	t.Log("/profile from URL")
@@ -94,8 +91,6 @@ func TestEndpoints(t *testing.T) {
 		b := new(bytes.Buffer)
 		err = json.NewEncoder(b).Encode(&reqModel)
 		require.NoError(t, err)
-
-		log.Donef("%s", string(b.Bytes()))
 
 		req, err := http.NewRequest("POST", "http://localhost:"+config.Port+"/profile", bytes.NewReader(b.Bytes()))
 		resp, err := (&http.Client{}).Do(req)
