@@ -94,7 +94,6 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		log.Donef("%s", string(b.Bytes()))
-		require.FailNow(t, "ok")
 
 		req, err := http.NewRequest("POST", "http://localhost:"+config.Port+"/profile", bytes.NewReader(b.Bytes()))
 		resp, err := (&http.Client{}).Do(req)
