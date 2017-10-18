@@ -4,7 +4,6 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   - PORT: $PORT
-  - AES256_SECRET_KEY: $AES256_SECRET_KEY
 
 workflows:
   up:

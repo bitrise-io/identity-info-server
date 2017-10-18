@@ -4,11 +4,10 @@ Returns parsed JSON of *.mobileprovision and *.p12.
 
 ## Server Configuration
 
-1. Export `PORT` and `AES256_SECRET_KEY` environment variables.
+1. Export `PORT` environment variables.
 
 ```
 export PORT=3000
-export AES256_SECRET_KEY=AES256key-000000000-32characters
 ```
 
 2. Run the server
@@ -41,7 +40,7 @@ go test ./...
 
 ### **POST /certificate**
 
->Request body: both key and data are AES-256 encrypted with the key: `AES256_SECRET_KEY` and in base64 format. Leave empty or do not include `key` if no any.
+>Request body: both key and data are in base64 format. Leave empty or do not include `key` if no any.
 ```
 {
     "key" : "FGZ...fKvus6/ee=",
@@ -51,9 +50,15 @@ go test ./...
 
 >Response body: the parsed certificate in JSON format
 
+For example:
+
+>curl -X POST -d "{\"data\":\"$(base64 /path/to/cert.p12)\",\"key\":\"$(echo "cert_pass" | base64 -)\"}" http://localhost:$PORT/certificate
+
+>curl -X POST -d "{\"data\":\"$(echo "http://url.to/the/cert.p12" | base64 -)\",\"key\":\"$(echo "cert_pass" | base64 -)\"}" http://localhost:$PORT/certificate
+
 ### **POST /profile**
 
->Request body: data is AES-256 encrypted with the key: `AES256_SECRET_KEY` and in base64 format.
+>Request body: data is in base64 format.
 ```
 {
     "data" : "5SN...jDHboV/zs="
@@ -61,3 +66,9 @@ go test ./...
 ```
 
 >Response body: the parsed profile in JSON format
+
+For example:
+
+>curl -X POST -d "{\"data\":\"$(base64 /path/to/profile.mobileprovision)\"}" http://localhost:$PORT/profile
+
+>curl -X POST -d "{\"data\":\"$(echo "http://url.to/the/profile.mobileprovision" | base64 -)\"}" http://localhost:$PORT/profile
