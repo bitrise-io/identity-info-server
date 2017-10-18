@@ -151,18 +151,16 @@ func getDecryptedDataFromResponse(r *http.Request, secret []byte) (RequestModel,
 		return RequestModel{}, fmt.Errorf("Failed to decode body to JSON, error: %s", err)
 	}
 
-	dataDecrypted, err := decryptData(request.Data, secret)
+	request.Data, err = decryptData(request.Data, secret)
 	if err != nil {
 		return RequestModel{}, fmt.Errorf("Failed to decrypt body, error: %s", err)
 	}
-	request.Data = dataDecrypted
 
 	if len(request.Key) != 0 {
-		keyDecrypted, err := decryptData(request.Key, secret)
+		request.Key, err = decryptData(request.Key, secret)
 		if err != nil {
 			return RequestModel{}, fmt.Errorf("Failed to decrypt body, error: %s", err)
 		}
-		request.Key = keyDecrypted
 	}
 
 	if isValidURL(string(request.Data)) {
@@ -170,11 +168,10 @@ func getDecryptedDataFromResponse(r *http.Request, secret []byte) (RequestModel,
 		if err != nil {
 			return RequestModel{}, fmt.Errorf("Failed to create request for the given URL, error: %s", err)
 		}
-		body, err := ioutil.ReadAll(response.Body)
+		request.Data, err = ioutil.ReadAll(response.Body)
 		if err != nil {
 			return RequestModel{}, fmt.Errorf("Failed to read body, error: %s", err)
 		}
-		request.Data = body
 	}
 
 	return request, nil
@@ -223,7 +220,7 @@ func (configs *Configs) handlerProfile(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	if _, err = w.Write([]byte(profJSON)); err != nil {
-		fmt.Printf("Failed to write response, error: %+v", err)
+		logCritical("Failed to write response, error: %+v", err)
 	}
 }
 

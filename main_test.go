@@ -26,6 +26,7 @@ func TestEndpoints(t *testing.T) {
 	config, err := NewConfig()
 	require.NoError(t, err)
 
+	//these envs are required for testing only
 	testProfilePath := os.Getenv("TEST_PROFILE_PATH")
 	test1CertificatePath := os.Getenv("TEST1_CERTIFICATE_PATH")
 	test1CertificatePassword := os.Getenv("TEST1_CERTIFICATE_PASSWORD")
@@ -39,6 +40,7 @@ func TestEndpoints(t *testing.T) {
 	go main()
 	time.Sleep(5 * time.Second)
 
+	// test endpoints
 	t.Log("/")
 	{
 		resp, err := http.Get("http://localhost:" + config.Port)
