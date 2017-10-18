@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,16 +13,10 @@ import (
 	"os"
 
 	plist "github.com/DHowett/go-plist"
-	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/pkcs12"
+	"github.com/fullsailor/pkcs7"
 	"github.com/gorilla/mux"
-	"github.com/trapacska/certificate-info/pkcs"
 )
-
-// RequestModel ...
-type RequestModel struct {
-	Data []byte `json:"data"`
-	Key  []byte `json:"key"`
-}
 
 //
 // CONFIG
@@ -56,6 +51,12 @@ func NewConfig() (*Configs, error) {
 
 //
 // MISC
+
+// RequestModel ...
+type RequestModel struct {
+	Data []byte `json:"data"`
+	Key  []byte `json:"key"`
+}
 
 func errorResponse(w http.ResponseWriter, f string, v ...interface{}) {
 	w.WriteHeader(http.StatusBadRequest)
@@ -94,24 +95,32 @@ func isValidURL(reqURL string) bool {
 }
 
 func profileToJSON(profile []byte) (string, error) {
-	cmd := command.New("openssl", "smime", "-inform", "der", "-verify", "-noverify")
-	cmd.SetStdin(bytes.NewReader(profile))
-
-	var b, berr bytes.Buffer
-	cmd.SetStdout(&b)
-	cmd.SetStderr(&berr)
-
-	err := cmd.Run()
-	if err != nil {
-		return "", fmt.Errorf("%s - %s", string(berr.Bytes()), err)
-	}
-
-	var intf interface{}
-	dec := plist.NewDecoder(bytes.NewReader(b.Bytes()))
-
-	err = dec.Decode(&intf)
+	pkcs7, err := pkcs7.Parse(profile)
 	if err != nil {
 		return "", err
+	}
+
+	var intf map[string]interface{}
+	dec := plist.NewDecoder(bytes.NewReader(pkcs7.Content))
+	if err := dec.Decode(&intf); err != nil {
+		return "", err
+	}
+
+	if certificatesPlistArray, ok := intf["DeveloperCertificates"]; ok {
+		if certificatesArray, ok := certificatesPlistArray.([]interface{}); ok {
+			certs := []*x509.Certificate{}
+			for _, base64Data := range certificatesArray {
+				if certArrayData, ok := base64Data.([]byte); ok {
+					cert, err := x509.ParseCertificate(certArrayData)
+					if err != nil {
+						return "", fmt.Errorf("E2: %s", err)
+					}
+
+					certs = append(certs, cert)
+				}
+			}
+			intf["DeveloperCertificates"] = certs
+		}
 	}
 
 	str, err := json.Marshal(intf)
@@ -123,7 +132,7 @@ func profileToJSON(profile []byte) (string, error) {
 }
 
 func certificateToJSON(p12, key []byte) (string, error) {
-	certs, err := pkcs.DecodeAllCerts(p12, string(key))
+	certs, err := pkcs12.DecodeAllCerts(p12, string(key))
 	if err != nil {
 		return "", err
 	}

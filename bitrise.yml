@@ -95,4 +95,6 @@ workflows:
             go get -t -d ./...
             go get -u -v github.com/tools/godep
             go get -u -v github.com/mattn/go-colorable
+            go get -u -v github.com/davecgh/go-spew/spew
+            go get -u -v github.com/pmezard/go-difflib/difflib
             godep save ./...
