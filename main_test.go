@@ -2,12 +2,8 @@ package main
 
 import (
 	"bytes"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -273,23 +269,4 @@ func TestEndpoints(t *testing.T) {
 
 		require.Equal(t, 400, resp.StatusCode)
 	}
-}
-
-func encrypt(plainText, key []byte) (encmess []byte, err error) {
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return
-	}
-
-	cipherText := make([]byte, aes.BlockSize+len(plainText))
-	iv := cipherText[:aes.BlockSize]
-	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
-		return
-	}
-
-	stream := cipher.NewCFBEncrypter(block, iv)
-	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
-
-	encmess = cipherText
-	return
 }
