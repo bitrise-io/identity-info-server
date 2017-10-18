@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -69,24 +70,25 @@ func logCritical(f string, v ...interface{}) {
 	fmt.Printf("[!] Exception: %s\n", fmt.Sprintf(f, v))
 }
 
-func decryptData(ciphertext, key []byte) ([]byte, error) {
-	c, err := aes.NewCipher(key)
+func decryptData(cipherText, key []byte) (decodedmess []byte, err error) {
+	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	gcm, err := cipher.NewGCM(c)
-	if err != nil {
-		return nil, err
+	if len(cipherText) < aes.BlockSize {
+		err = errors.New("ciphertext block size is too short")
+		return
 	}
 
-	nonceSize := gcm.NonceSize()
-	if len(ciphertext) < nonceSize {
-		return nil, fmt.Errorf("ciphertext too short %d - %d", len(ciphertext), nonceSize)
-	}
+	iv := cipherText[:aes.BlockSize]
+	cipherText = cipherText[aes.BlockSize:]
 
-	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
-	return gcm.Open(nil, nonce, ciphertext, nil)
+	stream := cipher.NewCFBDecrypter(block, iv)
+	stream.XORKeyStream(cipherText, cipherText)
+
+	decodedmess = cipherText
+	return
 }
 
 func isValidURL(reqURL string) bool {

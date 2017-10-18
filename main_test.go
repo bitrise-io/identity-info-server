@@ -275,21 +275,21 @@ func TestEndpoints(t *testing.T) {
 	}
 }
 
-func encrypt(plaintext []byte, key []byte) ([]byte, error) {
-	c, err := aes.NewCipher(key)
+func encrypt(plainText, key []byte) (encmess []byte, err error) {
+	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	gcm, err := cipher.NewGCM(c)
-	if err != nil {
-		return nil, err
+	cipherText := make([]byte, aes.BlockSize+len(plainText))
+	iv := cipherText[:aes.BlockSize]
+	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
+		return
 	}
 
-	nonce := make([]byte, gcm.NonceSize())
-	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		return nil, err
-	}
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
 
-	return gcm.Seal(nonce, nonce, plaintext, nil), nil
+	encmess = cipherText
+	return
 }
