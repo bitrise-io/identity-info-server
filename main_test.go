@@ -2,8 +2,12 @@ package main
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -74,6 +78,8 @@ func TestEndpoints(t *testing.T) {
 		fmt.Printf(string(bodyBytes))
 
 		require.Equal(t, 200, resp.StatusCode)
+
+		require.FailNow(t, "ok")
 	}
 
 	t.Log("/profile from URL")
@@ -269,4 +275,23 @@ func TestEndpoints(t *testing.T) {
 
 		require.Equal(t, 400, resp.StatusCode)
 	}
+}
+
+func encrypt(plaintext []byte, key []byte) ([]byte, error) {
+	c, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	gcm, err := cipher.NewGCM(c)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return nil, err
+	}
+
+	return gcm.Seal(nonce, nonce, plaintext, nil), nil
 }
