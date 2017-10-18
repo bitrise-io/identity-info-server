@@ -2,11 +2,7 @@
 
 Returns parsed JSON of *.mobileprovision and *.p12.
 
----
-<br>
-
 ## Server Configuration
----
 
 1. Export `PORT` and `AES256_SECRET_KEY` environment variables.
 
@@ -22,7 +18,6 @@ go run main.go
 ```
 
 ## Test Configuration
----
 
 1. After **Server Configuration** export the following environment variables
 
@@ -43,7 +38,6 @@ go test ./...
 ```
 
 ## Usage
----
 
 ### **POST /certificate**
 
