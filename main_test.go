@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bitrise-io/go-utils/log"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,13 +29,12 @@ func TestEndpoints(t *testing.T) {
 
 	//these envs are required for testing only
 	testProfilePath := os.Getenv("TEST_PROFILE_PATH")
-	test1CertificatePath := os.Getenv("TEST1_CERTIFICATE_PATH")
-	test1CertificatePassword := os.Getenv("TEST1_CERTIFICATE_PASSWORD")
-	test2CertificatePath := os.Getenv("TEST2_CERTIFICATE_PATH")
-	test2CertificatePassword := os.Getenv("TEST2_CERTIFICATE_PASSWORD")
-	testURLProfilePath := os.Getenv("TESTURL_PROFILE_URL")
-	testURLCertificatePath := os.Getenv("TESTURL_CERTIFICATE_URL")
-	testURLCertificatePassword := os.Getenv("TESTURL_CERTIFICATE_PASSWORD")
+	testNoPWCertificatePath := os.Getenv("TEST_NO_PW_CERTIFICATE_PATH")
+	testCertificatePath := os.Getenv("TEST_CERTIFICATE_PATH")
+	testCertificatePassword := os.Getenv("TEST_CERTIFICATE_PASSWORD")
+	testProfileURL := os.Getenv("TEST_PROFILE_URL")
+	testCertificateURL := os.Getenv("TEST_CERTIFICATE_URL")
+	testCertificateURLPassword := os.Getenv("TEST_CERTIFICATE_URL_PASSWORD")
 
 	//start server locally
 	go main()
@@ -82,7 +82,7 @@ func TestEndpoints(t *testing.T) {
 
 	t.Log("/profile from URL")
 	{
-		encryptedFileData, err := encrypt([]byte(testURLProfilePath), []byte(config.Secret))
+		encryptedFileData, err := encrypt([]byte(testProfileURL), []byte(config.Secret))
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
@@ -92,6 +92,9 @@ func TestEndpoints(t *testing.T) {
 		b := new(bytes.Buffer)
 		err = json.NewEncoder(b).Encode(&reqModel)
 		require.NoError(t, err)
+
+		log.Donef("%s", string(b.Bytes()))
+		require.FailNow(t, "ok")
 
 		req, err := http.NewRequest("POST", "http://localhost:"+config.Port+"/profile", bytes.NewReader(b.Bytes()))
 		resp, err := (&http.Client{}).Do(req)
@@ -106,14 +109,14 @@ func TestEndpoints(t *testing.T) {
 
 	t.Log("/certificate - without password")
 	{
-		fileData, err := ioutil.ReadFile(test1CertificatePath)
+		fileData, err := ioutil.ReadFile(testNoPWCertificatePath)
 		require.NoError(t, err)
 
 		encryptedFileData, err := encrypt(fileData, []byte(config.Secret))
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
-			Key:  []byte(test1CertificatePassword),
+			Key:  []byte(""),
 			Data: encryptedFileData,
 		}
 		b := new(bytes.Buffer)
@@ -131,13 +134,16 @@ func TestEndpoints(t *testing.T) {
 		require.Equal(t, 200, resp.StatusCode)
 	}
 
-	t.Log("/certificate - without password from URL")
+	t.Log("/certificate - with password from URL")
 	{
-		encryptedFileData, err := encrypt([]byte(testURLCertificatePath), []byte(config.Secret))
+		encryptedFileData, err := encrypt([]byte(testCertificateURL), []byte(config.Secret))
+		require.NoError(t, err)
+
+		encryptedPasswordData, err := encrypt([]byte(testCertificateURLPassword), []byte(config.Secret))
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
-			Key:  []byte(testURLCertificatePassword),
+			Key:  encryptedPasswordData,
 			Data: encryptedFileData,
 		}
 		b := new(bytes.Buffer)
@@ -157,12 +163,12 @@ func TestEndpoints(t *testing.T) {
 
 	t.Log("/certificate - with password")
 	{
-		fileData, err := ioutil.ReadFile(test2CertificatePath)
+		fileData, err := ioutil.ReadFile(testCertificatePath)
 		require.NoError(t, err)
 
 		encryptedFileData, err := encrypt(fileData, []byte(config.Secret))
 		require.NoError(t, err)
-		encryptedPW, err := encrypt([]byte(test2CertificatePassword), []byte(config.Secret))
+		encryptedPW, err := encrypt([]byte(testCertificatePassword), []byte(config.Secret))
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
@@ -186,7 +192,7 @@ func TestEndpoints(t *testing.T) {
 
 	t.Log("/certificate - with WRONG password")
 	{
-		fileData, err := ioutil.ReadFile(test2CertificatePath)
+		fileData, err := ioutil.ReadFile(testCertificatePath)
 		require.NoError(t, err)
 
 		encryptedFileData, err := encrypt(fileData, []byte(config.Secret))
@@ -215,14 +221,14 @@ func TestEndpoints(t *testing.T) {
 
 	t.Log("/certificate - with UNENCRYPTED password")
 	{
-		fileData, err := ioutil.ReadFile(test2CertificatePath)
+		fileData, err := ioutil.ReadFile(testCertificatePath)
 		require.NoError(t, err)
 
 		encryptedFileData, err := encrypt(fileData, []byte(config.Secret))
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
-			Key:  []byte(test2CertificatePassword),
+			Key:  []byte(testCertificatePassword),
 			Data: encryptedFileData,
 		}
 		b := new(bytes.Buffer)
@@ -242,12 +248,12 @@ func TestEndpoints(t *testing.T) {
 
 	t.Log("/certificate - with mismatched encryption password")
 	{
-		fileData, err := ioutil.ReadFile(test2CertificatePath)
+		fileData, err := ioutil.ReadFile(testCertificatePath)
 		require.NoError(t, err)
 
 		encryptedFileData, err := encrypt(fileData, []byte(config.Secret))
 		require.NoError(t, err)
-		encryptedPW, err := encrypt([]byte(test2CertificatePassword), []byte("wrong6Key-32Characters1234567890"))
+		encryptedPW, err := encrypt([]byte(testCertificatePassword), []byte("wrong6Key-32Characters1234567890"))
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
