@@ -1,0 +1,94 @@
+package certificateutil
+
+import (
+	"crypto/x509"
+	"fmt"
+	"strings"
+	"time"
+)
+
+// CertificateInfoModel ...
+type CertificateInfoModel struct {
+	CommonName string
+	TeamName   string
+	TeamID     string
+	EndDate    time.Time
+	StartDate  time.Time
+
+	Serial string
+
+	certificate x509.Certificate
+}
+
+// CheckValidity ...
+func (info CertificateInfoModel) CheckValidity() error {
+	timeNow := time.Now()
+	if !timeNow.After(info.StartDate) {
+		return fmt.Errorf("Certificate is not yet valid - validity starts at: %s", info.StartDate)
+	}
+	if !timeNow.Before(info.EndDate) {
+		return fmt.Errorf("Certificate is not valid anymore - validity ended at: %s", info.EndDate)
+	}
+	return nil
+}
+
+// NewCertificateInfo ...
+func NewCertificateInfo(certificate x509.Certificate) CertificateInfoModel {
+	return CertificateInfoModel{
+		CommonName:  certificate.Subject.CommonName,
+		TeamName:    strings.Join(certificate.Subject.Organization, " "),
+		TeamID:      strings.Join(certificate.Subject.OrganizationalUnit, " "),
+		EndDate:     certificate.NotAfter,
+		StartDate:   certificate.NotBefore,
+		Serial:      certificate.SerialNumber.String(),
+		certificate: certificate,
+	}
+}
+
+// CertificateInfos ...
+func CertificateInfos(certificates []*x509.Certificate) []CertificateInfoModel {
+	infos := []CertificateInfoModel{}
+	for _, certificate := range certificates {
+		if certificate != nil {
+			info := NewCertificateInfo(*certificate)
+			infos = append(infos, info)
+		}
+	}
+
+	return infos
+}
+
+// NewCertificateInfosFromPKCS12 ...
+func NewCertificateInfosFromPKCS12(pkcs12Pth, password string) ([]CertificateInfoModel, error) {
+	certificates, err := CertificatesFromPKCS12File(pkcs12Pth, password)
+	if err != nil {
+		return nil, err
+	}
+	return CertificateInfos(certificates), nil
+}
+
+// InstalledValidCodesigningCertificateInfos ...
+func InstalledValidCodesigningCertificateInfos() ([]CertificateInfoModel, error) {
+	validCertificates := []CertificateInfoModel{}
+
+	certificatesByName, err := InstalledCodesigningCertificates()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, certificates := range certificatesByName {
+		certificateInfos := CertificateInfos(certificates)
+
+		newestCertificate := new(CertificateInfoModel)
+		for _, certificateInfo := range certificateInfos {
+			if certificateInfo.CheckValidity() == nil && (newestCertificate == nil || certificateInfo.EndDate.After((*newestCertificate).EndDate)) {
+				newestCertificate = &certificateInfo
+			}
+		}
+		if newestCertificate != nil {
+			validCertificates = append(validCertificates, *newestCertificate)
+		}
+	}
+
+	return validCertificates, nil
+}

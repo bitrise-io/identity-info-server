@@ -64,9 +64,9 @@ func TestEndpoints(t *testing.T) {
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
 
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		//bodyBytes, err := ioutil.ReadAll(resp.Body)
 		require.NoError(t, err)
-		fmt.Printf(string(bodyBytes))
+		//fmt.Printf(string(bodyBytes))
 
 		require.Equal(t, 200, resp.StatusCode)
 	}
@@ -109,9 +109,9 @@ func TestEndpoints(t *testing.T) {
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
 
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		//bodyBytes, err := ioutil.ReadAll(resp.Body)
 		require.NoError(t, err)
-		fmt.Printf(string(bodyBytes))
+		//fmt.Printf(string(bodyBytes))
 
 		require.Equal(t, 200, resp.StatusCode)
 	}
@@ -130,9 +130,9 @@ func TestEndpoints(t *testing.T) {
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
 
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		//bodyBytes, err := ioutil.ReadAll(resp.Body)
 		require.NoError(t, err)
-		fmt.Printf(string(bodyBytes))
+		//fmt.Printf(string(bodyBytes))
 
 		require.Equal(t, 200, resp.StatusCode)
 	}
@@ -154,9 +154,9 @@ func TestEndpoints(t *testing.T) {
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
 
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		//bodyBytes, err := ioutil.ReadAll(resp.Body)
 		require.NoError(t, err)
-		fmt.Printf(string(bodyBytes))
+		//fmt.Printf(string(bodyBytes))
 
 		require.Equal(t, 200, resp.StatusCode)
 	}
@@ -179,9 +179,9 @@ func TestEndpoints(t *testing.T) {
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
 
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		//bodyBytes, err := ioutil.ReadAll(resp.Body)
 		require.NoError(t, err)
-		fmt.Printf(string(bodyBytes))
+		//fmt.Printf(string(bodyBytes))
 
 		require.Equal(t, 400, resp.StatusCode)
 	}

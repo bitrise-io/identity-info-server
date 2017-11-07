@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,9 +10,8 @@ import (
 	"net/url"
 	"os"
 
-	plist "github.com/DHowett/go-plist"
 	"github.com/bitrise-io/go-utils/pkcs12"
-	"github.com/fullsailor/pkcs7"
+	"github.com/bitrise-tools/go-xcode/profileutil"
 	"github.com/gorilla/mux"
 )
 
@@ -64,35 +61,17 @@ func isValidURL(reqURL string) bool {
 }
 
 func profileToJSON(profile []byte) (string, error) {
-	pkcs7, err := pkcs7.Parse(profile)
+	pkcs7, err := profileutil.ProvisioningProfileFromContent(profile)
 	if err != nil {
 		return "", err
 	}
 
-	var intf map[string]interface{}
-	dec := plist.NewDecoder(bytes.NewReader(pkcs7.Content))
-	if err := dec.Decode(&intf); err != nil {
+	profileModel, err := profileutil.NewProvisioningProfileInfo(*pkcs7)
+	if err != nil {
 		return "", err
 	}
 
-	if certificatesPlistArray, ok := intf["DeveloperCertificates"]; ok {
-		if certificatesArray, ok := certificatesPlistArray.([]interface{}); ok {
-			certs := []*x509.Certificate{}
-			for _, base64Data := range certificatesArray {
-				if certArrayData, ok := base64Data.([]byte); ok {
-					cert, err := x509.ParseCertificate(certArrayData)
-					if err != nil {
-						return "", fmt.Errorf("E2: %s", err)
-					}
-
-					certs = append(certs, cert)
-				}
-			}
-			intf["DeveloperCertificates"] = certs
-		}
-	}
-
-	str, err := json.Marshal(intf)
+	str, err := json.Marshal(profileModel)
 	if err != nil {
 		return "", err
 	}

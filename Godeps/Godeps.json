@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/trapacska/certificate-info",
+	"ImportPath": "github.com/bitrise-io/identity-info-server",
 	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
 	"Packages": [
@@ -7,8 +7,20 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/DHowett/go-plist",
-			"Rev": "f00f32b327ca6ad11a7c53d9ccc34d031b3795b8"
+			"ImportPath": "github.com/bitrise-io/go-utils/command",
+			"Rev": "961320f9011cedf55e1da0578949bf63450a96c0"
+		},
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/errorutil",
+			"Rev": "961320f9011cedf55e1da0578949bf63450a96c0"
+		},
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
+			"Rev": "961320f9011cedf55e1da0578949bf63450a96c0"
+		},
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
+			"Rev": "961320f9011cedf55e1da0578949bf63450a96c0"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pkcs12",
@@ -17,6 +29,22 @@
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pkcs12/internal/rc2",
 			"Rev": "961320f9011cedf55e1da0578949bf63450a96c0"
+		},
+		{
+			"ImportPath": "github.com/bitrise-tools/go-xcode/certificateutil",
+			"Rev": "c66a5fc2f1c12b0e19c7a4c2df842ca56f7efc8b"
+		},
+		{
+			"ImportPath": "github.com/bitrise-tools/go-xcode/exportoptions",
+			"Rev": "c66a5fc2f1c12b0e19c7a4c2df842ca56f7efc8b"
+		},
+		{
+			"ImportPath": "github.com/bitrise-tools/go-xcode/plistutil",
+			"Rev": "c66a5fc2f1c12b0e19c7a4c2df842ca56f7efc8b"
+		},
+		{
+			"ImportPath": "github.com/bitrise-tools/go-xcode/profileutil",
+			"Rev": "c66a5fc2f1c12b0e19c7a4c2df842ca56f7efc8b"
 		},
 		{
 			"ImportPath": "github.com/davecgh/go-spew/spew",
@@ -29,8 +57,13 @@
 		},
 		{
 			"ImportPath": "github.com/gorilla/mux",
-			"Comment": "v1.5.0-3-g9bd9ff2",
-			"Rev": "9bd9ff2d1d2a0660d35050674f2c3112547997af"
+			"Comment": "v1.6.0",
+			"Rev": "7f08801859139f86dfafd1c296e2cba9a80d292e"
+		},
+		{
+			"ImportPath": "github.com/pkg/errors",
+			"Comment": "v0.8.0-7-gf15c970",
+			"Rev": "f15c970de5b76fac0b59abb32d62c17cc7bed265"
 		},
 		{
 			"ImportPath": "github.com/pmezard/go-difflib/difflib",
@@ -46,6 +79,10 @@
 			"ImportPath": "github.com/stretchr/testify/require",
 			"Comment": "v1.1.4-72-g2aa2c17",
 			"Rev": "2aa2c176b9dab406a6970f6a55f513e8a8c8b18f"
+		},
+		{
+			"ImportPath": "howett.net/plist",
+			"Rev": "233df3c4f07b0c562da0e8a6fb850681ac49bb90"
 		}
 	]
 }
