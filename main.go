@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/bitrise-io/go-utils/pkcs12"
 	"github.com/bitrise-tools/go-xcode/profileutil"
@@ -100,13 +101,18 @@ func getDataFromResponse(r *http.Request) (RequestModel, error) {
 	}
 
 	if isValidURL(string(request.Data)) {
-		response, err := http.Get(string(request.Data))
+		response, err := http.Get(strings.TrimSpace(string(request.Data)))
 		if err != nil {
 			return RequestModel{}, fmt.Errorf("Failed to create request for the given URL, error: %s", err)
 		}
+
 		request.Data, err = ioutil.ReadAll(response.Body)
 		if err != nil {
 			return RequestModel{}, fmt.Errorf("Failed to read body, error: %s", err)
+		}
+
+		if response.StatusCode != http.StatusOK {
+			return RequestModel{}, fmt.Errorf("Failed to download file, error: %s", string(request.Data))
 		}
 	}
 
