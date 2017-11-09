@@ -84,7 +84,7 @@ func profileToJSON(profile []byte) (string, error) {
 func certificateToJSON(p12, key []byte) (string, error) {
 	certs, err := pkcs12.DecodeAllCerts(p12, string(key))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("%s, pw: %s", err, string(key))
 	}
 
 	certModels := []certificateutil.CertificateInfoModel{}
