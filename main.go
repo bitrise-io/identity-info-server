@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/bitrise-io/go-utils/pkcs12"
+	"github.com/bitrise-tools/go-xcode/certificateutil"
 	"github.com/bitrise-tools/go-xcode/profileutil"
 	"github.com/gorilla/mux"
 )
@@ -86,10 +87,16 @@ func certificateToJSON(p12, key []byte) (string, error) {
 		return "", err
 	}
 
-	b, err := json.Marshal(certs)
+	certModels := []certificateutil.CertificateInfoModel{}
+	for _, cert := range certs {
+		certModels = append(certModels, certificateutil.NewCertificateInfo(*cert))
+	}
+
+	b, err := json.Marshal(certModels)
 	if err != nil {
 		return "", err
 	}
+
 	return string(b), nil
 }
 
