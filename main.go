@@ -86,7 +86,7 @@ func certificateToJSON(p12, key []byte) (string, error) {
 	sKey := strings.TrimSuffix(string(key), "\n")
 	certs, err := pkcs12.DecodeAllCerts(p12, sKey)
 	if err != nil {
-		return "", fmt.Errorf("%s, pw: %s", err, string(sKey))
+		return "", err
 	}
 
 	certModels := []certificateutil.CertificateInfoModel{}
@@ -152,6 +152,13 @@ func handlerCertificate(w http.ResponseWriter, r *http.Request) {
 
 	certsJSON, err := certificateToJSON(data.Data, data.Key)
 	if err != nil {
+		if err == pkcs12.ErrIncorrectPassword {
+			w.WriteHeader(http.StatusBadRequest)
+			if _, err := w.Write([]byte(fmt.Sprintf(`{"error":"%s", "error_type":"invalid_password"}`, err))); err != nil {
+				logCritical("Failed to write response, error: %+v\n", err)
+			}
+			return
+		}
 		errorResponse(w, "Failed to get certificate info, error: %s", err)
 		return
 	}
