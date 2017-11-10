@@ -105,7 +105,11 @@ func getDataFromResponse(r *http.Request) (RequestModel, error) {
 	request := RequestModel{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
-		return RequestModel{}, fmt.Errorf("Failed to decode body to JSON, error: %s", err)
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			fmt.Printf("Failed to read body, error: %s", err)
+		}
+		return RequestModel{}, fmt.Errorf("Failed to decode body to JSON, error: %s, body: %s", err, string(body))
 	}
 
 	if isValidURL(string(request.Data)) {
