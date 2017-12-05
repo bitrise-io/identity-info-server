@@ -3,7 +3,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - PORT: $PORT
+  - PORT: 3000
 
 workflows:
   up:
@@ -32,8 +32,8 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-            no_vendor_paths="$(go list ./... | grep -v vendor | grep -v 'apis/testing' | grep -v 'apis/toolresults')"
-            echo $no_vendor_paths
+
+            no_vendor_paths="$(go list ./... | grep -v vendor)"
             envman add --key GOLIST_WITHOUT_VENDOR --value "$no_vendor_paths"
     - script:
         title: Err check
@@ -41,6 +41,7 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
+
             errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
     - script:
         title: Go lint
@@ -48,6 +49,7 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
+
             while read -r line; do
               echo "-> Linting: $line"
               golint_out="$(golint $line)"
@@ -63,6 +65,7 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
+
             go test -v ./...
 
   _install-test-tools:
