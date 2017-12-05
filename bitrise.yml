@@ -1,19 +1,36 @@
 format_version: "3"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
-
+project_type: ""
 app:
   envs:
   - PORT: 3000
-
 workflows:
-  up:
+  _install-test-tools:
     steps:
     - script:
-        title: Start server
+        title: Install required testing tools
         inputs:
         - content: |-
             #!/bin/bash
-            go run main.go
+            set -ex
+            # Check for unhandled errors
+            go get -u -v github.com/kisielk/errcheck
+            # Go lint
+            go get -u -v github.com/golang/lint/golint
+  dep-update:
+    title: Dep update
+    description: |
+      Used for updating bitrise dependencies with dep
+    steps:
+    - script:
+        title: Dependency update
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go get -u -v github.com/golang/dep/cmd/dep
+            dep ensure -v
+            dep ensure -v -update
   test:
     before_run:
     - _install-test-tools
@@ -32,7 +49,6 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-
             no_vendor_paths="$(go list ./... | grep -v vendor)"
             envman add --key GOLIST_WITHOUT_VENDOR --value "$no_vendor_paths"
     - script:
@@ -41,7 +57,6 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-
             errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
     - script:
         title: Go lint
@@ -65,34 +80,12 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-
             go test -v ./...
-
-  _install-test-tools:
+  up:
     steps:
     - script:
-        title: Install required testing tools
+        title: Start server
         inputs:
         - content: |-
             #!/bin/bash
-            set -ex
-            # Check for unhandled errors
-            go get -u -v github.com/kisielk/errcheck
-            # Go lint
-            go get -u -v github.com/golang/lint/golint
-
-
-  dep-update:
-    title: Dep update
-    description: |
-      Used for updating bitrise dependencies with dep
-    steps:
-    - script:
-        title: Dependency update
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            go get -u -v github.com/golang/dep/cmd/dep
-            dep ensure -v
-            dep ensure -v -update
+            go run main.go
