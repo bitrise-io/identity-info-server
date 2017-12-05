@@ -1,6 +1,6 @@
 # identity-info
 
-Returns parsed JSON of *.mobileprovision and *.p12.
+Returns parsed JSON of `*.mobileprovision` and `*.p12`.
 
 ## Server Configuration
 
