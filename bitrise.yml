@@ -91,4 +91,6 @@ workflows:
         inputs:
         - content: |-
             #!/bin/bash
+            set -ex
+
             go run main.go
