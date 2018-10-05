@@ -4,6 +4,7 @@ project_type: ""
 app:
   envs:
   - PORT: 3000
+  
 workflows:
   _install-test-tools:
     steps:

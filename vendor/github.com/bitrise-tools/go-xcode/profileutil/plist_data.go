@@ -89,10 +89,18 @@ func (profile PlistData) GetExportMethod() exportoptions.Method {
 
 	entitlements, ok := data.GetMapStringInterface("Entitlements")
 	if ok {
-		if allow, ok := entitlements.GetBool("get-task-allow"); ok && allow {
-			return exportoptions.MethodDevelopment
+		platform, _ := data.GetStringArray("Platform")
+		if len(platform) != 0 {
+			switch platform[0] {
+			case "OSX":
+				return exportoptions.MethodDevelopment
+			case "iOS":
+				if allow, ok := entitlements.GetBool("get-task-allow"); ok && allow {
+					return exportoptions.MethodDevelopment
+				}
+				return exportoptions.MethodAdHoc
+			}
 		}
-		return exportoptions.MethodAdHoc
 	}
 
 	return exportoptions.MethodDefault
