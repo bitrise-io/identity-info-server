@@ -2,66 +2,110 @@
 
 
 [[projects]]
+  digest = "1:d4bd4e3d2d5c6e3de6e0735bc0d43fa5573c3a7cda0f0049ad4824dbecc36f04"
   name = "github.com/bitrise-io/go-utils"
-  packages = ["command","errorutil","fileutil","pathutil","pkcs12","pkcs12/internal/rc2"]
+  packages = [
+    "colorstring",
+    "command",
+    "errorutil",
+    "fileutil",
+    "log",
+    "pathutil",
+    "pkcs12",
+    "pkcs12/internal/rc2",
+  ]
+  pruneopts = ""
   revision = "961320f9011cedf55e1da0578949bf63450a96c0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:1bf3bf5167d9a8caa0a3e3e5c62cc59e1bff66c446eebc43929d4ee600ac425e"
   name = "github.com/bitrise-tools/go-xcode"
-  packages = ["certificateutil","exportoptions","plistutil","profileutil"]
-  revision = "c66a5fc2f1c12b0e19c7a4c2df842ca56f7efc8b"
+  packages = [
+    "certificateutil",
+    "exportoptions",
+    "plistutil",
+    "profileutil",
+  ]
+  pruneopts = ""
+  revision = "82aa5ad881aad17afd7b73af03dabc4ef89b8a53"
 
 [[projects]]
   branch = "master"
+  digest = "1:a1167e4b0cb9b77e29d829c9ba69e84561ed750f96309512658c94ab207f5692"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = ""
   revision = "ecdeabc65495df2dec95d7c4a4c3e021903035e5"
 
 [[projects]]
   branch = "master"
+  digest = "1:79f0eecec67bc768713829e38fb5b7a198d7fee2ad1019d2d7adf0b3de8520ac"
   name = "github.com/fullsailor/pkcs7"
   packages = ["."]
+  pruneopts = ""
   revision = "a009d8d7de53d9503c797cb8ec66fa3b21eed209"
 
 [[projects]]
+  digest = "1:20ed7daa9b3b38b6d1d39b48ab3fd31122be5419461470d0c28de3e121c93ecf"
   name = "github.com/gorilla/context"
   packages = ["."]
+  pruneopts = ""
   revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
   version = "v1.1"
 
 [[projects]]
+  digest = "1:a759b98c93c6dab29652eacd70cd7d0e88f02de8bc63051f787329966ec0a0ee"
   name = "github.com/gorilla/mux"
   packages = ["."]
+  pruneopts = ""
   revision = "7f08801859139f86dfafd1c296e2cba9a80d292e"
   version = "v1.6.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:cf172c58bb2a13ed39ea1c9e79525567c63bcc2c4afbb6cf023e87b31780f249"
   name = "github.com/pkg/errors"
   packages = ["."]
+  pruneopts = ""
   revision = "f15c970de5b76fac0b59abb32d62c17cc7bed265"
 
 [[projects]]
+  digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = ""
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:3b4870930878fb464616897c4e4bc100d323a8f95c3d8bbff0952d372571f7f7"
   name = "github.com/stretchr/testify"
-  packages = ["assert","require"]
+  packages = [
+    "assert",
+    "require",
+  ]
+  pruneopts = ""
   revision = "2aa2c176b9dab406a6970f6a55f513e8a8c8b18f"
 
 [[projects]]
   branch = "master"
+  digest = "1:ac8b19a1e2c4c474da6dfbc28db0d8d17ee1e944fe8167db7208b6caccfbfc24"
   name = "howett.net/plist"
   packages = ["."]
+  pruneopts = ""
   revision = "233df3c4f07b0c562da0e8a6fb850681ac49bb90"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5b5f31a3ede31bd664630d0893bcf5a5b384ea0f310f3a97a1a9ebca7a150c78"
+  input-imports = [
+    "github.com/bitrise-io/go-utils/pkcs12",
+    "github.com/bitrise-tools/go-xcode/certificateutil",
+    "github.com/bitrise-tools/go-xcode/profileutil",
+    "github.com/gorilla/mux",
+    "github.com/stretchr/testify/require",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

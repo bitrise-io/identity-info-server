@@ -86,6 +86,16 @@ func InstalledCodesigningCertificateNames() ([]string, error) {
 	return installedCodesigningCertificateNamesFromOutput(out)
 }
 
+// InstalledMacAppStoreCertificateNames ...
+func InstalledMacAppStoreCertificateNames() ([]string, error) {
+	cmd := command.New("security", "find-identity", "-v", "-p", "macappstore")
+	out, err := cmd.RunAndReturnTrimmedCombinedOutput()
+	if err != nil {
+		return nil, commandError(cmd.PrintableCommandArgs(), out, err)
+	}
+	return installedCodesigningCertificateNamesFromOutput(out)
+}
+
 func normalizeFindCertificateOut(out string) ([]string, error) {
 	certificateContents := []string{}
 	pattern := `(?s)(-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----)`
@@ -108,14 +118,25 @@ func normalizeFindCertificateOut(out string) ([]string, error) {
 }
 
 // InstalledCodesigningCertificates ...
-func InstalledCodesigningCertificates() (map[string][]*x509.Certificate, error) {
-	certificatesByName := map[string][]*x509.Certificate{}
-
+func InstalledCodesigningCertificates() ([]*x509.Certificate, error) {
 	certificateNames, err := InstalledCodesigningCertificateNames()
 	if err != nil {
 		return nil, err
 	}
+	return getInstalledCertificatesByNameSlice(certificateNames)
+}
 
+// InstalledMacAppStoreCertificates ...
+func InstalledMacAppStoreCertificates() ([]*x509.Certificate, error) {
+	certificateNames, err := InstalledMacAppStoreCertificateNames()
+	if err != nil {
+		return nil, err
+	}
+	return getInstalledCertificatesByNameSlice(certificateNames)
+}
+
+func getInstalledCertificatesByNameSlice(certificateNames []string) ([]*x509.Certificate, error) {
+	certificates := []*x509.Certificate{}
 	for _, name := range certificateNames {
 		cmd := command.New("security", "find-certificate", "-c", name, "-p", "-a")
 		out, err := cmd.RunAndReturnTrimmedCombinedOutput()
@@ -128,17 +149,15 @@ func InstalledCodesigningCertificates() (map[string][]*x509.Certificate, error) 
 			return nil, err
 		}
 
-		certificates := []*x509.Certificate{}
-		for _, rawCertificate := range normalizedOuts {
-			certificate, err := CeritifcateFromPemContent([]byte(rawCertificate))
+		for _, normalizedOut := range normalizedOuts {
+			certificate, err := CeritifcateFromPemContent([]byte(normalizedOut))
 			if err != nil {
 				return nil, err
 			}
+
 			certificates = append(certificates, certificate)
 		}
-
-		certificatesByName[name] = certificates
 	}
 
-	return certificatesByName, nil
+	return certificates, nil
 }
