@@ -55,7 +55,10 @@ func (profile PlistData) GetApplicationIdentifier() string {
 
 	applicationID, ok := entitlements.GetString("application-identifier")
 	if !ok {
-		return ""
+		applicationID, ok = entitlements.GetString("com.apple.application-identifier")
+		if !ok {
+			return ""
+		}
 	}
 	return applicationID
 }
@@ -79,27 +82,32 @@ func (profile PlistData) GetBundleIdentifier() string {
 // GetExportMethod ...
 func (profile PlistData) GetExportMethod() exportoptions.Method {
 	data := plistutil.PlistData(profile)
-	_, ok := data.GetStringArray("ProvisionedDevices")
-	if !ok {
-		if allDevices, ok := data.GetBool("ProvisionsAllDevices"); ok && allDevices {
-			return exportoptions.MethodEnterprise
-		}
-		return exportoptions.MethodAppStore
-	}
+	entitlements, _ := data.GetMapStringInterface("Entitlements")
+	platform, _ := data.GetStringArray("Platform")
 
-	entitlements, ok := data.GetMapStringInterface("Entitlements")
-	if ok {
-		platform, _ := data.GetStringArray("Platform")
-		if len(platform) != 0 {
-			switch platform[0] {
-			case "OSX":
-				return exportoptions.MethodDevelopment
-			case "iOS":
-				if allow, ok := entitlements.GetBool("get-task-allow"); ok && allow {
-					return exportoptions.MethodDevelopment
+	if len(platform) != 0 {
+		switch strings.ToLower(platform[0]) {
+		case "osx":
+			_, ok := data.GetStringArray("ProvisionedDevices")
+			if !ok {
+				if allDevices, ok := data.GetBool("ProvisionsAllDevices"); ok && allDevices {
+					return exportoptions.MethodDeveloperID
 				}
-				return exportoptions.MethodAdHoc
+				return exportoptions.MethodAppStore
 			}
+			return exportoptions.MethodDevelopment
+		case "ios":
+			_, ok := data.GetStringArray("ProvisionedDevices")
+			if !ok {
+				if allDevices, ok := data.GetBool("ProvisionsAllDevices"); ok && allDevices {
+					return exportoptions.MethodEnterprise
+				}
+				return exportoptions.MethodAppStore
+			}
+			if allow, ok := entitlements.GetBool("get-task-allow"); ok && allow {
+				return exportoptions.MethodDevelopment
+			}
+			return exportoptions.MethodAdHoc
 		}
 	}
 
@@ -143,4 +151,25 @@ func (profile PlistData) GetDeveloperCertificates() [][]byte {
 	data := plistutil.PlistData(profile)
 	developerCertificates, _ := data.GetByteArrayArray("DeveloperCertificates")
 	return developerCertificates
+}
+
+// GetTeamName ...
+func (profile PlistData) GetTeamName() string {
+	data := plistutil.PlistData(profile)
+	teamName, _ := data.GetString("TeamName")
+	return teamName
+}
+
+// GetCreationDate ...
+func (profile PlistData) GetCreationDate() time.Time {
+	data := plistutil.PlistData(profile)
+	creationDate, _ := data.GetTime("CreationDate")
+	return creationDate
+}
+
+// GetProvisionsAllDevices ...
+func (profile PlistData) GetProvisionsAllDevices() bool {
+	data := plistutil.PlistData(profile)
+	provisionsAlldevices, _ := data.GetBool("ProvisionsAllDevices")
+	return provisionsAlldevices
 }
