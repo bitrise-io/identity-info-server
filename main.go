@@ -29,13 +29,13 @@ type RequestModel struct {
 
 func errorResponse(w http.ResponseWriter, f string, v ...interface{}) {
 	w.WriteHeader(http.StatusBadRequest)
-	if _, err := w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, fmt.Sprintf(f, v)))); err != nil {
+	if _, err := w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, fmt.Sprintf(f, v...)))); err != nil {
 		logCritical("Failed to write response, error: %+v\n", err)
 	}
 }
 
 func logCritical(f string, v ...interface{}) {
-	fmt.Printf("[!] Exception: %s\n", fmt.Sprintf(f, v))
+	fmt.Printf("[!] Exception: %s\n", fmt.Sprintf(f, v...))
 }
 
 func decryptData(ciphertext, key []byte) ([]byte, error) {
