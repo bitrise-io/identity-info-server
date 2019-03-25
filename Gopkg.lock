@@ -19,16 +19,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1bf3bf5167d9a8caa0a3e3e5c62cc59e1bff66c446eebc43929d4ee600ac425e"
+  digest = "1:8d4ca2635ed0e2af5332818f1fb03ce03bb86c5018121a355d6c118140627bc7"
   name = "github.com/bitrise-tools/go-xcode"
   packages = [
     "certificateutil",
     "exportoptions",
+    "models",
     "plistutil",
     "profileutil",
+    "utility",
   ]
   pruneopts = ""
-  revision = "82aa5ad881aad17afd7b73af03dabc4ef89b8a53"
+  revision = "b3f7172f910693d60973a07b61db757aca81f778"
 
 [[projects]]
   branch = "master"
