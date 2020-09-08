@@ -4,25 +4,22 @@ project_type: ""
 app:
   envs:
   - PORT: 3000
-  
+
 workflows:
-  dep-update:
-    title: Dep update
-    description: |
-      Used for updating bitrise dependencies with dep
-    steps:
-    - script:
-        title: Dependency update
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            go get -u -v github.com/golang/dep/cmd/dep
-            dep ensure -v
-            dep ensure -v -update
   deploy:
     steps:
     - heroku-deploy: {}
+
+  ci:
+    after_run:
+      - test
+    steps:
+    - script:
+        title: Update go
+        inputs:
+        - content: |
+            #!/bin/bash
+            ./scripts/update_go.sh
   test:
     envs:
     - TEST_PROFILE_PATH: $TEST_PROFILE_PATH
