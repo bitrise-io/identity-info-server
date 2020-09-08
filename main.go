@@ -188,12 +188,16 @@ func handlerProfile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		logCritical("No PORT specified")
-		return
+func getPort() string {
+	if port, ok := os.LookupEnv("PORT"); ok {
+		return port
 	}
+
+	return "8080"
+}
+
+func main() {
+	port := getPort()
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/certificate", handlerCertificate).Methods("POST")

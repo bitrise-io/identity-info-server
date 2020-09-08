@@ -1,2 +1,6 @@
 .gows*
 .bitrise*
+
+.vscode
+
+coverage*

@@ -3,26 +3,33 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 project_type: ""
 app:
   envs:
+  - GO_VERSION: 1.14.1
   - PORT: 3000
-  
+
 workflows:
-  dep-update:
-    title: Dep update
-    description: |
-      Used for updating bitrise dependencies with dep
-    steps:
-    - script:
-        title: Dependency update
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            go get -u -v github.com/golang/dep/cmd/dep
-            dep ensure -v
-            dep ensure -v -update
   deploy:
     steps:
     - heroku-deploy: {}
+
+  ci:
+    after_run:
+      - test
+    steps:
+    - script:
+        title: Update go
+        inputs:
+        - content: |
+            #!/bin/bash
+            ./scripts/update_go.sh
+    - script:
+        title: Install dependencies
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            go get github.com/kisielk/errcheck
+            go get -u golang.org/x/lint/golint
+
   test:
     envs:
     - TEST_PROFILE_PATH: $TEST_PROFILE_PATH
@@ -33,10 +40,28 @@ workflows:
     - TEST_CERTIFICATE_URL: $TEST_CERTIFICATE_URL
     - TEST_CERTIFICATE_URL_PASSWORD: $TEST_CERTIFICATE_URL_PASSWORD
     steps:
-    - go-list:
-    - golint:
-    - errcheck:
-    - go-test:
+    - script:
+        title: Unit tests
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            go test -v -cover -race -coverprofile=coverage.txt -covermode=atomic ./...
+    - script:
+        title: Linting
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            GOLIST_WITHOUT_VENDOR="$(go list ./... | grep -v vendor)"
+            go vet $GOLIST_WITHOUT_VENDOR
+            errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
+
+            # lint
+            while read -r line; do
+              echo "-> Linting: $line"
+              golint -set_exit_status $line
+            done <<< "$GOLIST_WITHOUT_VENDOR"
   up:
     steps:
     - script:
