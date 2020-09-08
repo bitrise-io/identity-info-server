@@ -31,10 +31,22 @@ workflows:
     - TEST_CERTIFICATE_URL: $TEST_CERTIFICATE_URL
     - TEST_CERTIFICATE_URL_PASSWORD: $TEST_CERTIFICATE_URL_PASSWORD
     steps:
-    - go-list:
-    - golint:
-    - errcheck:
     - go-test:
+    - script:
+      title: Linting
+      inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            GOLIST_WITHOUT_VENDOR="$(go list ./... | grep -v vendor)"
+            go vet $GOLIST_WITHOUT_VENDOR
+            errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
+
+            # lint
+            while read -r line; do
+              echo "-> Linting: $line"
+              golint -set_exit_status $line
+            done <<< "$GOLIST_WITHOUT_VENDOR"
   up:
     steps:
     - script:
