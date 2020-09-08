@@ -1,6 +1,6 @@
 module github.com/bitrise-io/identity-info-server
 
-go 1.15
+go 1.14
 
 require (
 	github.com/bitrise-io/go-utils v0.0.0-20171018094958-961320f9011c
