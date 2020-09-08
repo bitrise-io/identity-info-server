@@ -3,6 +3,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 project_type: ""
 app:
   envs:
+  - GO_VERSION: 1.14.1
   - PORT: 3000
 
 workflows:
