@@ -31,10 +31,16 @@ workflows:
     - TEST_CERTIFICATE_URL: $TEST_CERTIFICATE_URL
     - TEST_CERTIFICATE_URL_PASSWORD: $TEST_CERTIFICATE_URL_PASSWORD
     steps:
-    - go-test:
     - script:
-      title: Linting
-      inputs:
+        title: Unit tests
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            go test -v -cover -race -coverprofile=coverage.txt -covermode=atomic ./...
+    - script:
+        title: Linting
+        inputs:
         - content: |
             #!/bin/bash
             set -ex
