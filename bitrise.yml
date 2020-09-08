@@ -21,6 +21,15 @@ workflows:
         - content: |
             #!/bin/bash
             ./scripts/update_go.sh
+    - script:
+        title: Install dependencies
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            go get github.com/kisielk/errcheck
+            go get -u golang.org/x/lint/golint
+
   test:
     envs:
     - TEST_PROFILE_PATH: $TEST_PROFILE_PATH
