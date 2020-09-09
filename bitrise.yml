@@ -3,13 +3,35 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 project_type: ""
 app:
   envs:
+  - SERVICE_NAME: cert-info
   - GO_VERSION: 1.14.1
   - PORT: 3000
 
 workflows:
   deploy:
     steps:
-    - heroku-deploy: {}
+      - script:
+          title: Setup GCLOUD SDK
+          inputs:
+            - content: |
+                #!/bin/bash
+                set -ex
+                ./tooling/setup_gcloud_cli.sh
+      - script:
+          title: Build container
+          inputs:
+            - content: |
+                #!/bin/bash
+                set -ex
+                docker build . -t $IMAGE_ID
+                docker push $IMAGE_ID
+      - script:
+          title: Deploy service to Google cloud
+          inputs:
+            - content: |
+                #!/bin/bash
+                set -ex
+                gcloud run deploy $SERVICE_NAME --image $IMAGE_ID --platform managed --region us-central1
 
   ci:
     after_run:
