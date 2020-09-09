@@ -16,7 +16,7 @@ workflows:
             - content: |
                 #!/bin/bash
                 set -ex
-                ./tooling/setup_gcloud_cli.sh
+                ./scripts/setup_gcloud_cli.sh
       - script:
           title: Build container
           inputs:
