@@ -15,7 +15,8 @@ import (
 	"github.com/bitrise-io/go-utils/pkcs12"
 	"github.com/bitrise-tools/go-xcode/certificateutil"
 	"github.com/bitrise-tools/go-xcode/profileutil"
-	"github.com/gorilla/mux"
+	"gopkg.in/DataDog/dd-trace-go.v1/contrib/gorilla/mux"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 //
@@ -199,7 +200,10 @@ func getPort() string {
 func main() {
 	port := getPort()
 
-	router := mux.NewRouter().StrictSlash(true)
+	tracer.Start()
+	defer tracer.Stop()
+
+	router := mux.NewRouter(mux.WithAnalytics(true)).StrictSlash(true)
 	router.HandleFunc("/certificate", handlerCertificate).Methods("POST")
 	router.HandleFunc("/profile", handlerProfile).Methods("POST")
 	router.HandleFunc("/", index).Methods("GET")

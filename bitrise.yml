@@ -3,54 +3,40 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 project_type: ""
 app:
   envs:
-  - SERVICE_NAME: cert-info
-  - GO_VERSION: 1.14.1
+  - SERVICE_NAME: identity-info
   - PORT: 3000
 
 workflows:
   deploy:
     steps:
+      - git::https://github.com/bitrise-io/build-env@master:
+          title: Set up environment
+          run_if: $.IsCI
+          inputs:
+            - SERVICE_NAME: $SERVICE_NAME
+            - GCLOUD_KEY: $GCLOUD_KEY
+            - GKE_CLUSTER: website
+            - PRIVATE_GITHUB_HELM_CHART: bitrise-io/k8s-recipes/api-service-0.1.1
       - script:
-          title: Setup GCLOUD SDK
+          title: Build image
           inputs:
             - content: |
                 #!/bin/bash
                 set -ex
-                ./scripts/setup_gcloud_cli.sh
+
+                docker build . -t $SERVICE_IMAGE_ID
+                docker push $SERVICE_IMAGE_ID
       - script:
-          title: Build container
+          title: Deploy service to Kubernetes
           inputs:
             - content: |
                 #!/bin/bash
                 set -ex
-                docker build . -t $IMAGE_ID
-                docker push $IMAGE_ID
-      - script:
-          title: Deploy service to Google cloud
-          inputs:
-            - content: |
-                #!/bin/bash
-                set -ex
-                gcloud run deploy $SERVICE_NAME --image $IMAGE_ID --platform managed --region us-central1
+                helm upgrade --install --atomic $SERVICE_NAME .helm/api-service --set image.name=$SERVICE_IMAGE_ID -f ./manifest.yaml -n website-services
 
   ci:
     after_run:
       - test
-    steps:
-    - script:
-        title: Update go
-        inputs:
-        - content: |
-            #!/bin/bash
-            ./scripts/update_go.sh
-    - script:
-        title: Install dependencies
-        inputs:
-        - content: |
-            #!/bin/bash
-            set -ex
-            go get github.com/kisielk/errcheck
-            go get -u golang.org/x/lint/golint
 
   test:
     envs:

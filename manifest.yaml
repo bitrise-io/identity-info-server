@@ -1,0 +1,34 @@
+---
+replicaCount: 2
+
+global:
+  service:
+    name: "identity-info"
+
+  version: local
+  team: "platform"
+
+env: ""
+  # - name: TEST
+  #   value: DEBUG
+  # - name: TEST2
+  #   value: DEBUG
+
+livenessCheck:
+  url: /
+  delay: 5
+  timeout: 5
+  period: 5
+
+readynessCheck:
+  url: /
+  delay: 5
+  timeout: 5
+  period: 5
+
+ddog:
+  apm: true
+
+ingress-gateway:
+  ingress:
+    enabled: true

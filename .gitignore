@@ -3,4 +3,6 @@
 
 .vscode
 
+.helm
+
 coverage*
