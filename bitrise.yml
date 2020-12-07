@@ -16,7 +16,6 @@ workflows:
             - SERVICE_NAME: $SERVICE_NAME
             - GCLOUD_KEY: $GCLOUD_KEY
             - GKE_CLUSTER: website
-            - PRIVATE_GITHUB_HELM_CHART: bitrise-io/k8s-recipes/api-service-0.1.1
       - script:
           title: Build image
           inputs:
@@ -32,7 +31,7 @@ workflows:
             - content: |
                 #!/bin/bash
                 set -ex
-                helm upgrade --install --atomic $SERVICE_NAME .helm/api-service --set image.name=$SERVICE_IMAGE_ID -f ./manifest.yaml -n website-services
+                helm upgrade --install --atomic $SERVICE_NAME main/api-service --set image.name=$SERVICE_IMAGE_ID -f ./manifest.yaml -n website-services
 
   ci:
     after_run:
