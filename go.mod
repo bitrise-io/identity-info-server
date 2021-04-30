@@ -37,7 +37,7 @@ require (
 	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1 // indirect
 	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/tools v0.0.0-20201204162204-73cf035baebf // indirect
-	gopkg.in/DataDog/dd-trace-go.v1 v1.27.1
+	gopkg.in/DataDog/dd-trace-go.v1 v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	howett.net/plist v0.0.0-20171105004507-233df3c4f07b // indirect
 )
