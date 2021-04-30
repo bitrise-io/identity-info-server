@@ -85,7 +85,7 @@ func profileToJSON(profile []byte) (string, error) {
 
 func certificateToJSON(p12, key []byte) (string, error) {
 	sKey := strings.TrimSuffix(string(key), "\n")
-	certs, err := pkcs12.DecodeAllCerts(p12, "sKey")
+	certs, _, err := pkcs12.DecodeAll(p12, sKey)
 	if err != nil {
 		return "", err
 	}
