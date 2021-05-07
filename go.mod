@@ -6,6 +6,7 @@ require (
 	github.com/DataDog/datadog-go v4.2.0+incompatible // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/bitrise-io/go-utils v0.0.0-20171018094958-961320f9011c
+	github.com/bitrise-io/pkcs12 v0.0.0-20210430063833-0da06eb56630
 	github.com/bitrise-tools/go-xcode v0.0.0-20190228101802-b3f7172f9106
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/fullsailor/pkcs7 v0.0.0-20170613201221-a009d8d7de53 // indirect

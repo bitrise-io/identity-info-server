@@ -117,6 +117,8 @@ github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d/go.mod h1:6QX/PXZ
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bitrise-io/go-utils v0.0.0-20171018094958-961320f9011c h1:ZAbfZ/6AnrKppmOU4NR+cxME1ArVw1vGyxgR7ndcWqE=
 github.com/bitrise-io/go-utils v0.0.0-20171018094958-961320f9011c/go.mod h1:Pp48eQd8BSNEzWWTBxdFUd/ufS5b5Bgkmt9D5NedjWg=
+github.com/bitrise-io/pkcs12 v0.0.0-20210430063833-0da06eb56630 h1:V+xoYqGSkN8aUxCc806zDKjGGpBVUtV0Vytf5OsB3gc=
+github.com/bitrise-io/pkcs12 v0.0.0-20210430063833-0da06eb56630/go.mod h1:UiXKNs0essbC14a2TvGlnUKo9isP9m4guPrp8KJHJpU=
 github.com/bitrise-tools/go-xcode v0.0.0-20190228101802-b3f7172f9106 h1:JgD65YvkX3161ieU5q0XzUrbr2kO9id2MdPFjuUkGUs=
 github.com/bitrise-tools/go-xcode v0.0.0-20190228101802-b3f7172f9106/go.mod h1:PL/0GBjJb03cyJAh1sN0CrJe0y7dXzDW3O5m03CvM7Q=
 github.com/bketelsen/crypt v0.0.3-0.20200106085610-5cbc8cc4026c/go.mod h1:MKsuJmJgSg28kpZDP6UIiPt0e0Oz0kqKNGyRaWEPv84=

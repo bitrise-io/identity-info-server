@@ -12,7 +12,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bitrise-io/go-utils/pkcs12"
+	"github.com/bitrise-io/pkcs12"
 	"github.com/bitrise-tools/go-xcode/certificateutil"
 	"github.com/bitrise-tools/go-xcode/profileutil"
 	"gopkg.in/DataDog/dd-trace-go.v1/contrib/gorilla/mux"
@@ -85,7 +85,7 @@ func profileToJSON(profile []byte) (string, error) {
 
 func certificateToJSON(p12, key []byte) (string, error) {
 	sKey := strings.TrimSuffix(string(key), "\n")
-	certs, err := pkcs12.DecodeAllCerts(p12, sKey)
+	certs, _, err := pkcs12.DecodeAll(p12, sKey)
 	if err != nil {
 		return "", err
 	}
