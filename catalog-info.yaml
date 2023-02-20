@@ -11,7 +11,7 @@ metadata:
 spec:
   type: service
   lifecycle: experimental
-  owner: "internal-platform"
+  owner: "internal-platform" # TODO: should be release-automation
   system: "release-automation"
   dependsOn:
     []
