@@ -60,8 +60,8 @@ github.com/stretchr/testify/require
 # github.com/tinylib/msgp v1.1.2
 ## explicit
 github.com/tinylib/msgp/msgp
-# golang.org/x/sys v0.0.0-20201202213521-69691e467435
-## explicit; go 1.12
+# golang.org/x/sys v0.1.0
+## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
