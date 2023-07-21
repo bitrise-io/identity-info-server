@@ -16,6 +16,7 @@ workflows:
             - SERVICE_NAME: $SERVICE_NAME
             - GCLOUD_KEY: $GCLOUD_KEY
             - GKE_CLUSTER: website
+
       - script:
           title: Build image
           inputs:
@@ -47,6 +48,32 @@ workflows:
     - TEST_CERTIFICATE_URL: $TEST_CERTIFICATE_URL
     - TEST_CERTIFICATE_URL_PASSWORD: $TEST_CERTIFICATE_URL_PASSWORD
     steps:
+    - script:
+        run_if: $.IsCI
+        inputs:
+          - content: |-
+              set -eox pipefail
+              GO_VERSION=1.20.2
+              GO_INSTALL=go$GO_VERSION.linux-amd64.tar.gz
+  
+              # remove existing go
+              rm -rf /usr/local/go
+  
+              # download new one
+              curl -s https://dl.google.com/go/$GO_INSTALL -o $GO_INSTALL
+  
+              # extract it
+              tar -C /usr/local -xzf $GO_INSTALL
+  
+              # remove install file
+              rm $GO_INSTALL
+  
+              #version
+              go version
+  
+              go env GO111MODULE
+              # Support GOPATH Steps with old (1.44) Bitirse CLI
+              go env -w GO111MODULE=auto
     - script:
         title: Unit tests
         inputs:
