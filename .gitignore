@@ -1,8 +1,6 @@
 .gows*
 .bitrise*
-
 .vscode
-
 .helm
-
 coverage*
+.idea/
