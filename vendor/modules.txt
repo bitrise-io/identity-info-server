@@ -1,32 +1,27 @@
 # github.com/DataDog/datadog-go v4.2.0+incompatible
 ## explicit
 github.com/DataDog/datadog-go/statsd
-# github.com/bitrise-io/go-utils v0.0.0-20171018094958-961320f9011c
-## explicit
+# github.com/bitrise-io/go-pkcs12 v0.0.0-20230913085202-b40653eb06c7
+## explicit; go 1.19
+github.com/bitrise-io/go-pkcs12
+github.com/bitrise-io/go-pkcs12/internal/rc2
+# github.com/bitrise-io/go-utils v1.0.9
+## explicit; go 1.13
 github.com/bitrise-io/go-utils/colorstring
 github.com/bitrise-io/go-utils/command
-github.com/bitrise-io/go-utils/errorutil
 github.com/bitrise-io/go-utils/fileutil
 github.com/bitrise-io/go-utils/log
 github.com/bitrise-io/go-utils/pathutil
-github.com/bitrise-io/go-utils/pkcs12
-github.com/bitrise-io/go-utils/pkcs12/internal/rc2
-# github.com/bitrise-io/pkcs12 v0.0.0-20210430063833-0da06eb56630
-## explicit
-github.com/bitrise-io/pkcs12
-github.com/bitrise-io/pkcs12/internal/rc2
-# github.com/bitrise-tools/go-xcode v0.0.0-20190228101802-b3f7172f9106
-## explicit
-github.com/bitrise-tools/go-xcode/certificateutil
-github.com/bitrise-tools/go-xcode/exportoptions
-github.com/bitrise-tools/go-xcode/models
-github.com/bitrise-tools/go-xcode/plistutil
-github.com/bitrise-tools/go-xcode/profileutil
-github.com/bitrise-tools/go-xcode/utility
+# github.com/bitrise-io/go-xcode v1.0.16
+## explicit; go 1.20
+github.com/bitrise-io/go-xcode/certificateutil
+github.com/bitrise-io/go-xcode/exportoptions
+github.com/bitrise-io/go-xcode/plistutil
+github.com/bitrise-io/go-xcode/profileutil
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
-# github.com/fullsailor/pkcs7 v0.0.0-20170613201221-a009d8d7de53
+# github.com/fullsailor/pkcs7 v0.0.0-20190404230743-d7302db945fa
 ## explicit
 github.com/fullsailor/pkcs7
 # github.com/google/uuid v1.1.2
@@ -51,17 +46,18 @@ github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/stretchr/objx v0.1.1
-## explicit
-# github.com/stretchr/testify v1.6.1
-## explicit; go 1.13
+# github.com/stretchr/testify v1.8.4
+## explicit; go 1.20
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
 # github.com/tinylib/msgp v1.1.2
 ## explicit
 github.com/tinylib/msgp/msgp
-# golang.org/x/sys v0.0.0-20201202213521-69691e467435
-## explicit; go 1.12
+# golang.org/x/crypto v0.12.0
+## explicit; go 1.17
+golang.org/x/crypto/pbkdf2
+# golang.org/x/sys v0.11.0
+## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/windows
 golang.org/x/sys/windows/registry
@@ -86,9 +82,9 @@ gopkg.in/DataDog/dd-trace-go.v1/internal/log
 gopkg.in/DataDog/dd-trace-go.v1/internal/version
 # gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f
 ## explicit
-# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+# gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# howett.net/plist v0.0.0-20171105004507-233df3c4f07b
-## explicit
+# howett.net/plist v1.0.0
+## explicit; go 1.12
 howett.net/plist
