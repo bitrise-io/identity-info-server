@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/bitrise-tools/go-xcode/profileutil"
 	"net/http"
+
+	"github.com/bitrise-tools/go-xcode/profileutil"
 )
 
 func handlerProfile(w http.ResponseWriter, r *http.Request) {

@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"gopkg.in/DataDog/dd-trace-go.v1/contrib/gorilla/mux"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 	"net/http"
 	"os"
+
+	"gopkg.in/DataDog/dd-trace-go.v1/contrib/gorilla/mux"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 func main() {

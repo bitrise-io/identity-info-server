@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bitrise-io/pkcs12"
-	"github.com/bitrise-tools/go-xcode/certificateutil"
 	"net/http"
 	"strings"
+
+	"github.com/bitrise-io/pkcs12"
+	"github.com/bitrise-tools/go-xcode/certificateutil"
 )
 
 func handlerCertificate(w http.ResponseWriter, r *http.Request) {
