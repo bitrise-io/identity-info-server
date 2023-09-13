@@ -29,7 +29,7 @@ type ProvisioningProfileInfoModel struct {
 	ExpirationDate        time.Time               `json:"expiration_date"`
 }
 
-func handlerProfile(w http.ResponseWriter, r *http.Request) {
+func handleProfile(w http.ResponseWriter, r *http.Request) {
 	data, err := getDataFromResponse(r)
 	if err != nil {
 		errorResponse(w, "Failed to decrypt request body, error: %s", err)

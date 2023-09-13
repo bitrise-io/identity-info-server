@@ -16,8 +16,9 @@ func main() {
 	defer tracer.Stop()
 
 	router := mux.NewRouter(mux.WithAnalytics(true)).StrictSlash(true)
-	router.HandleFunc("/certificate", handlerCertificate).Methods("POST")
-	router.HandleFunc("/profile", handlerProfile).Methods("POST")
+	router.HandleFunc("/certificate", handleCertificate).Methods("POST")
+	router.HandleFunc("/profile", handleProfile).Methods("POST")
+	router.HandleFunc("/keystore", handleKeystore).Methods("POST")
 	router.HandleFunc("/", index).Methods("GET")
 
 	if err := http.ListenAndServe(":"+port, router); err != nil {

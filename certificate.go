@@ -23,7 +23,7 @@ type CertificateInfoModel struct {
 	StartDate       time.Time `json:"start_date"`
 }
 
-func handlerCertificate(w http.ResponseWriter, r *http.Request) {
+func handleCertificate(w http.ResponseWriter, r *http.Request) {
 	data, err := getDataFromResponse(r)
 	if err != nil {
 		errorResponse(w, "Failed to decrypt request body, error: %s", err)
