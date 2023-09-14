@@ -28,7 +28,16 @@ func handleKeystore(w http.ResponseWriter, r *http.Request) {
 
 	keystoreJSON, err := keystoreToJSON(reqModel.Data, string(reqModel.Password), string(reqModel.Alias), string(reqModel.KeyPassword))
 	if err != nil {
-		errorResponse(w, "Failed to get keystore info, error: %s", err)
+		switch err {
+		case keystore.IncorrectKeystorePasswordError:
+			errorResponseWithType(w, err, "invalid_password")
+		case keystore.IncorrectAliasError:
+			errorResponseWithType(w, err, "invalid_alias")
+		case keystore.IncorrectKeyPasswordError:
+			errorResponseWithType(w, err, "invalid_key_password")
+		default:
+			errorResponse(w, "Failed to get keystore info, error: %s", err)
+		}
 		return
 	}
 

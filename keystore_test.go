@@ -32,19 +32,19 @@ func Test_handleKeystore(t *testing.T) {
 			name:         "Invalid keystore password",
 			w:            httptest.NewRecorder(),
 			r:            httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "debug.keystore", "", "androiddebugkey", "android"))),
-			expectedResp: `{"error":"Failed to get keystore info, error: incorrect keystore password"}`,
+			expectedResp: `{"error":"incorrect keystore password", "error_type":"invalid_password"}`,
 		},
 		{
 			name:         "Invalid alias",
 			w:            httptest.NewRecorder(),
 			r:            httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "debug.keystore", "android", "", "android"))),
-			expectedResp: `{"error":"Failed to get keystore info, error: incorrect key alias"}`,
+			expectedResp: `{"error":"incorrect key alias", "error_type":"invalid_alias"}`,
 		},
 		{
 			name:         "Invalid key password",
 			w:            httptest.NewRecorder(),
 			r:            httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "debug.keystore", "android", "androiddebugkey", ""))),
-			expectedResp: `{"error":"Failed to get keystore info, error: incorrect key password"}`,
+			expectedResp: `{"error":"incorrect key password", "error_type":"invalid_key_password"}`,
 		},
 		{
 			name:         "Valid credentials",

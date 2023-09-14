@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -33,10 +32,7 @@ func handleCertificate(w http.ResponseWriter, r *http.Request) {
 	certsJSON, err := certificateToJSON(data.Data, string(data.Password))
 	if err != nil {
 		if err == pkcs12.ErrIncorrectPassword {
-			w.WriteHeader(http.StatusBadRequest)
-			if _, err := w.Write([]byte(fmt.Sprintf(`{"error":"%s", "error_type":"invalid_password"}`, err))); err != nil {
-				logCritical("Failed to write response, error: %+v\n", err)
-			}
+			errorResponseWithType(w, err, "invalid_password")
 			return
 		}
 		errorResponse(w, "Failed to get certificate info, error: %s", err)
