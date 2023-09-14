@@ -24,13 +24,13 @@ type CertificateInfoModel struct {
 }
 
 func handleCertificate(w http.ResponseWriter, r *http.Request) {
-	data, err := getDataFromResponse(r)
+	data, err := getRequestModel(r)
 	if err != nil {
 		errorResponse(w, "Failed to decrypt request body, error: %s", err)
 		return
 	}
 
-	certsJSON, err := certificateToJSON(data.Data, string(data.Key))
+	certsJSON, err := certificateToJSON(data.Data, string(data.Password))
 	if err != nil {
 		if err == pkcs12.ErrIncorrectPassword {
 			w.WriteHeader(http.StatusBadRequest)
@@ -57,7 +57,6 @@ func certificateToJSON(data []byte, password string) (string, error) {
 	}
 
 	certModels := certsToCertModels(certs)
-
 	b, err := json.Marshal(certModels)
 	if err != nil {
 		return "", err

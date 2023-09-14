@@ -30,7 +30,7 @@ type ProvisioningProfileInfoModel struct {
 }
 
 func handleProfile(w http.ResponseWriter, r *http.Request) {
-	data, err := getDataFromResponse(r)
+	data, err := getRequestModel(r)
 	if err != nil {
 		errorResponse(w, "Failed to decrypt request body, error: %s", err)
 		return
@@ -60,7 +60,6 @@ func profileToJSON(data []byte) (string, error) {
 	}
 
 	profileModel := profileToProfileModel(profile)
-
 	b, err := json.Marshal(profileModel)
 	if err != nil {
 		return "", err

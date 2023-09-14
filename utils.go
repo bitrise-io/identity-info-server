@@ -12,11 +12,13 @@ import (
 
 // RequestModel ...
 type RequestModel struct {
-	Data []byte `json:"data"`
-	Key  []byte `json:"key"`
+	Data        []byte `json:"data"`
+	Password    []byte `json:"key"`
+	Alias       []byte `json:"alias"`
+	KeyPassword []byte `json:"key_password"`
 }
 
-func getDataFromResponse(r *http.Request) (RequestModel, error) {
+func getRequestModel(r *http.Request) (RequestModel, error) {
 	request := RequestModel{}
 
 	body, err := io.ReadAll(r.Body)
