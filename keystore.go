@@ -7,6 +7,7 @@ import (
 	"github.com/bitrise-io/go-android/v2/keystore"
 )
 
+// CertificateInformation ...
 type CertificateInformation struct {
 	FirstAndLastName   string `json:"first_and_last_name,omitempty"`
 	OrganizationalUnit string `json:"organizational_unit,omitempty"`

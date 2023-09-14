@@ -49,56 +49,11 @@ workflows:
     - TEST_CERTIFICATE_URL: $TEST_CERTIFICATE_URL
     - TEST_CERTIFICATE_URL_PASSWORD: $TEST_CERTIFICATE_URL_PASSWORD
     steps:
-    - script:
-        run_if: $.IsCI
-        inputs:
-          - content: |-
-              set -eox pipefail
-              GO_INSTALL=go$GO_VERSION.linux-amd64.tar.gz
-  
-              # remove existing go
-              rm -rf /usr/local/go
-  
-              # download new one
-              curl -s https://dl.google.com/go/$GO_INSTALL -o $GO_INSTALL
-  
-              # extract it
-              tar -C /usr/local -xzf $GO_INSTALL
-  
-              # remove install file
-              rm $GO_INSTALL
-  
-              #version
-              go version
-  
-              go env GO111MODULE
-              # Support GOPATH Steps with old (1.44) Bitirse CLI
-              go env -w GO111MODULE=auto
-              
-              go install github.com/kisielk/errcheck@latest
-              go install golang.org/x/lint/golint@latest
-    - script:
-        title: Unit tests
-        inputs:
-        - content: |
-            #!/bin/bash
-            set -ex
-            go test -v -cover -race -coverprofile=coverage.txt -covermode=atomic ./...
-    - script:
-        title: Linting
-        inputs:
-        - content: |
-            #!/bin/bash
-            set -ex
-            GOLIST_WITHOUT_VENDOR="$(go list ./... | grep -v vendor)"
-            go vet $GOLIST_WITHOUT_VENDOR
-            errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
+    - go-list: {}
+    - golint: {}
+    - errcheck: {}
+    - go-test: {}
 
-            # lint
-            while read -r line; do
-              echo "-> Linting: $line"
-              golint -set_exit_status $line
-            done <<< "$GOLIST_WITHOUT_VENDOR"
   up:
     steps:
     - script:
