@@ -53,8 +53,8 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
-			Key:  []byte{},
-			Data: fileData,
+			Password: []byte{},
+			Data:     fileData,
 		}
 		b := new(bytes.Buffer)
 		err = json.NewEncoder(b).Encode(&reqModel)
@@ -74,8 +74,8 @@ func TestEndpoints(t *testing.T) {
 	t.Log("/profile from URL")
 	{
 		reqModel := RequestModel{
-			Key:  []byte{},
-			Data: []byte(testProfileURL),
+			Password: []byte{},
+			Data:     []byte(testProfileURL),
 		}
 		b := new(bytes.Buffer)
 		err := json.NewEncoder(b).Encode(&reqModel)
@@ -98,8 +98,8 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
-			Key:  []byte(""),
-			Data: fileData,
+			Password: []byte(""),
+			Data:     fileData,
 		}
 		b := new(bytes.Buffer)
 		err = json.NewEncoder(b).Encode(&reqModel)
@@ -119,8 +119,8 @@ func TestEndpoints(t *testing.T) {
 	t.Log("/certificate - with password from URL")
 	{
 		reqModel := RequestModel{
-			Key:  []byte(testCertificateURLPassword),
-			Data: []byte(testCertificateURL),
+			Password: []byte(testCertificateURLPassword),
+			Data:     []byte(testCertificateURL),
 		}
 		b := new(bytes.Buffer)
 		err := json.NewEncoder(b).Encode(&reqModel)
@@ -143,8 +143,8 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
-			Key:  []byte(testCertificatePassword),
-			Data: fileData,
+			Password: []byte(testCertificatePassword),
+			Data:     fileData,
 		}
 		b := new(bytes.Buffer)
 		err = json.NewEncoder(b).Encode(&reqModel)
@@ -167,8 +167,8 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
-			Key:  []byte("WRONGPW"),
-			Data: fileData,
+			Password: []byte("WRONGPW"),
+			Data:     fileData,
 		}
 
 		b := new(bytes.Buffer)
