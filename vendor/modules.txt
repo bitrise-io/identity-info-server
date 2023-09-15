@@ -1,7 +1,7 @@
 # github.com/DataDog/datadog-go v4.2.0+incompatible
 ## explicit
 github.com/DataDog/datadog-go/statsd
-# github.com/bitrise-io/go-android/v2 v2.0.0-alpha.4.0.20230914070511-cc4b538b4c3e
+# github.com/bitrise-io/go-android/v2 v2.0.0-alpha.5
 ## explicit; go 1.16
 github.com/bitrise-io/go-android/v2/keystore
 # github.com/bitrise-io/go-pkcs12 v0.0.0-20230913085202-b40653eb06c7

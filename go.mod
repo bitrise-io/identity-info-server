@@ -3,7 +3,7 @@ module github.com/bitrise-io/identity-info-server
 go 1.20
 
 require (
-	github.com/bitrise-io/go-android/v2 v2.0.0-alpha.4.0.20230914070511-cc4b538b4c3e
+	github.com/bitrise-io/go-android/v2 v2.0.0-alpha.5
 	github.com/bitrise-io/go-pkcs12 v0.0.0-20230913085202-b40653eb06c7
 	github.com/bitrise-io/go-xcode v1.0.16
 	github.com/stretchr/testify v1.8.4
