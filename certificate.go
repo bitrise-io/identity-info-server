@@ -11,15 +11,13 @@ import (
 )
 
 // CertificateInfoModel ...
-// TODO: verify json field names and omit empty
 type CertificateInfoModel struct {
-	CommonName      string    `json:"common_name,omitempty"`
-	TeamName        string    `json:"team_name,omitempty"`
-	TeamID          string    `json:"team_id,omitempty"`
-	Serial          string    `json:"serial,omitempty"`
-	SHA1Fingerprint string    `json:"sha_1_fingerprint,omitempty"`
-	EndDate         time.Time `json:"end_date"`
-	StartDate       time.Time `json:"start_date"`
+	CommonName string    `json:"CommonName,omitempty"`
+	TeamName   string    `json:"TeamName,omitempty"`
+	TeamID     string    `json:"TeamID,omitempty"`
+	Serial     string    `json:"Serial,omitempty"`
+	EndDate    time.Time `json:"EndDate"`
+	StartDate  time.Time `json:"StartDate"`
 }
 
 func handleCertificate(w http.ResponseWriter, r *http.Request) {
@@ -65,13 +63,12 @@ func certsToCertModels(certs []certificateutil.CertificateInfoModel) []Certifica
 	var certModels []CertificateInfoModel
 	for _, cert := range certs {
 		certModels = append(certModels, CertificateInfoModel{
-			CommonName:      cert.CommonName,
-			TeamName:        cert.TeamName,
-			TeamID:          cert.TeamID,
-			EndDate:         cert.EndDate,
-			StartDate:       cert.StartDate,
-			Serial:          cert.Serial,
-			SHA1Fingerprint: cert.SHA1Fingerprint,
+			CommonName: cert.CommonName,
+			TeamName:   cert.TeamName,
+			TeamID:     cert.TeamID,
+			EndDate:    cert.EndDate,
+			StartDate:  cert.StartDate,
+			Serial:     cert.Serial,
 		})
 	}
 	return certModels

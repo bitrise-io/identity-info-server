@@ -12,21 +12,17 @@ import (
 )
 
 // ProvisioningProfileInfoModel ...
-// TODO: verify json field names and omit empty
 type ProvisioningProfileInfoModel struct {
-	UUID                  string                  `json:"uuid,omitempty"`
-	Name                  string                  `json:"name,omitempty"`
-	TeamName              string                  `json:"team_name,omitempty"`
-	TeamID                string                  `json:"team_id,omitempty"`
-	BundleID              string                  `json:"bundle_id,omitempty"`
-	ExportType            exportoptions.Method    `json:"export_type,omitempty"`
-	ProvisionedDevices    []string                `json:"provisioned_devices,omitempty"`
-	DeveloperCertificates []CertificateInfoModel  `json:"developer_certificates,omitempty"`
-	Entitlements          plistutil.PlistData     `json:"entitlements,omitempty"`
-	ProvisionsAllDevices  bool                    `json:"provisions_all_devices,omitempty"`
-	Type                  profileutil.ProfileType `json:"type,omitempty"`
-	CreationDate          time.Time               `json:"creation_date"`
-	ExpirationDate        time.Time               `json:"expiration_date"`
+	UUID                  string                 `json:"UUID,omitempty"`
+	Name                  string                 `json:"Name,omitempty"`
+	TeamName              string                 `json:"TeamName,omitempty"`
+	TeamID                string                 `json:"TeamID,omitempty"`
+	BundleID              string                 `json:"BundleID,omitempty"`
+	ExportType            exportoptions.Method   `json:"ExportType,omitempty"`
+	ProvisionedDevices    []string               `json:"ProvisionedDevices,omitempty"`
+	DeveloperCertificates []CertificateInfoModel `json:"DeveloperCertificates,omitempty"`
+	Entitlements          plistutil.PlistData    `json:"Entitlements,omitempty"`
+	ExpirationDate        time.Time              `json:"ExpirationDate"`
 }
 
 func handleProfile(w http.ResponseWriter, r *http.Request) {
@@ -79,9 +75,6 @@ func profileToProfileModel(profile profileutil.ProvisioningProfileInfoModel) Pro
 		ProvisionedDevices:    profile.ProvisionedDevices,
 		DeveloperCertificates: certsToCertModels(profile.DeveloperCertificates),
 		Entitlements:          profile.Entitlements,
-		ProvisionsAllDevices:  profile.ProvisionsAllDevices,
-		Type:                  profile.Type,
-		CreationDate:          profile.CreationDate,
 		ExpirationDate:        profile.ExpirationDate,
 	}
 }
