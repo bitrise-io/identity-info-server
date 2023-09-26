@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: describe how test data can be generated from provisioning profile files.
 func TestProfileInfoModel(t *testing.T) {
 	tests := []struct {
 		name         string

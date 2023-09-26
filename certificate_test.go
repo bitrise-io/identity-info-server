@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TODO: describe how test data can be generated from P12 certificates.
 func Test_certsToCertModels(t *testing.T) {
 	tests := []struct {
 		name         string
