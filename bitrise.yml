@@ -78,13 +78,6 @@ workflows:
             go install github.com/kisielk/errcheck@latest
             go install golang.org/x/lint/golint@latest
     - script:
-        title: Unit tests
-        inputs:
-        - content: |
-            #!/bin/bash
-            set -ex
-            go test -v -cover -race -coverprofile=coverage.txt -covermode=atomic ./...
-    - script:
         title: Linting
         inputs:
         - content: |
@@ -99,6 +92,14 @@ workflows:
               echo "-> Linting: $line"
               golint -set_exit_status $line
             done <<< "$GOLIST_WITHOUT_VENDOR"
+    - script:
+        title: Unit tests
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            go test -v -cover -race -coverprofile=coverage.txt -covermode=atomic ./...
+
 
   up:
     steps:

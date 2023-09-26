@@ -13,6 +13,7 @@ import (
 // ProfileListingType is the Provisioning Profile type to be used when listing profiles.
 type ProfileListingType string
 
+// ProfileListingTypes ...
 const (
 	DevelopmentListingType            ProfileListingType = "Development"
 	AdHocListingType                  ProfileListingType = "Ad hoc"
@@ -28,6 +29,7 @@ const (
 // ProfileListingPlatform is the Provisioning Profile platform to be used when listing profiles.
 type ProfileListingPlatform string
 
+// ProfileListingPlatforms ...
 const (
 	IOSListingPlatform   ProfileListingPlatform = "iOS"
 	MacOSListingPlatform ProfileListingPlatform = "macOS"

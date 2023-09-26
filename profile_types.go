@@ -2,8 +2,10 @@ package main
 
 import "github.com/bitrise-io/go-xcode/profileutil"
 
+// ProfileType ...
 type ProfileType string
 
+// ProfileTypes ...
 const (
 	Development ProfileType = "Development"
 	AdHoc       ProfileType = "Ad hoc"
