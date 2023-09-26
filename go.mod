@@ -6,6 +6,7 @@ require (
 	github.com/bitrise-io/go-android/v2 v2.0.0-alpha.5
 	github.com/bitrise-io/go-pkcs12 v0.0.0-20230913085202-b40653eb06c7
 	github.com/bitrise-io/go-xcode v1.0.16
+	github.com/fullsailor/pkcs7 v0.0.0-20190404230743-d7302db945fa
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/DataDog/dd-trace-go.v1 v1.27.1
 )
@@ -14,7 +15,6 @@ require (
 	github.com/DataDog/datadog-go v4.2.0+incompatible // indirect
 	github.com/bitrise-io/go-utils v1.0.9 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/fullsailor/pkcs7 v0.0.0-20190404230743-d7302db945fa // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/gorilla/context v0.0.0-20160226214623-1ea25387ff6f // indirect
 	github.com/gorilla/mux v1.6.0 // indirect

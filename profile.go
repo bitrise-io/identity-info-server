@@ -7,8 +7,30 @@ import (
 
 	"github.com/bitrise-io/go-xcode/exportoptions"
 	"github.com/bitrise-io/go-xcode/plistutil"
-
 	"github.com/bitrise-io/go-xcode/profileutil"
+)
+
+// ProfileListingType is the Provisioning Profile type to be used when listing profiles.
+type ProfileListingType string
+
+const (
+	DevelopmentListingType            ProfileListingType = "Development"
+	AdHocListingType                  ProfileListingType = "Ad hoc"
+	AppStoreListingType               ProfileListingType = "App Store"
+	EnterpriseListingType             ProfileListingType = "Enterprise"
+	TVOSDevelopmentListingType        ProfileListingType = "tvOS Development"
+	TVOSAdHocListingType              ProfileListingType = "tvOS Ad hoc"
+	TVOSDAppStoreListingType          ProfileListingType = "tvOS App Store"
+	TVOSEnterpriseListingType         ProfileListingType = "tvOS Enterprise"
+	DeveloperIDApplicationListingType ProfileListingType = "Developer ID Application"
+)
+
+// ProfileListingPlatform is the Provisioning Profile platform to be used when listing profiles.
+type ProfileListingPlatform string
+
+const (
+	IOSListingPlatform   ProfileListingPlatform = "iOS"
+	MacOSListingPlatform ProfileListingPlatform = "macOS"
 )
 
 // ProvisioningProfileInfoModel ...
@@ -19,6 +41,8 @@ type ProvisioningProfileInfoModel struct {
 	TeamID                string                 `json:"TeamID,omitempty"`
 	BundleID              string                 `json:"BundleID,omitempty"`
 	ExportType            exportoptions.Method   `json:"ExportType,omitempty"`
+	ListingType           ProfileListingType     `json:"ListingType,omitempty"`
+	ListingPlatform       ProfileListingPlatform `json:"ListingPlatform,omitempty"`
 	ProvisionedDevices    []string               `json:"ProvisionedDevices,omitempty"`
 	DeveloperCertificates []CertificateInfoModel `json:"DeveloperCertificates,omitempty"`
 	Entitlements          plistutil.PlistData    `json:"Entitlements,omitempty"`
@@ -65,6 +89,10 @@ func profileToJSON(data []byte) (string, error) {
 }
 
 func profileToProfileModel(profile profileutil.ProvisioningProfileInfoModel) ProvisioningProfileInfoModel {
+	profileType := getProfileType(profile)
+	profilePlatform := profile.Type
+	listingType, listingPlatform := profileTypesToListingTypes(profileType, profilePlatform)
+
 	return ProvisioningProfileInfoModel{
 		UUID:                  profile.UUID,
 		Name:                  profile.Name,
@@ -72,6 +100,8 @@ func profileToProfileModel(profile profileutil.ProvisioningProfileInfoModel) Pro
 		TeamID:                profile.TeamID,
 		BundleID:              profile.BundleID,
 		ExportType:            profile.ExportType,
+		ListingType:           listingType,
+		ListingPlatform:       listingPlatform,
 		ProvisionedDevices:    profile.ProvisionedDevices,
 		DeveloperCertificates: certsToCertModels(profile.DeveloperCertificates),
 		Entitlements:          profile.Entitlements,
