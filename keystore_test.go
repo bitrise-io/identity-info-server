@@ -70,7 +70,7 @@ func Test_handleKeystore(t *testing.T) {
 }
 
 func createRequestData(t *testing.T, testFileName string, pass, alias, keyPass string) []byte {
-	pth := filepath.Join("testdata", testFileName)
+	pth := filepath.Join("testdata", "keystores", testFileName)
 	b, err := os.ReadFile(pth)
 	require.NoError(t, err)
 

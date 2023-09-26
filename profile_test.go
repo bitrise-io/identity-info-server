@@ -105,7 +105,7 @@ func TestProfileInfoModel(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f, err := os.Open(filepath.Join("testdata", "plist", tt.pth))
+			f, err := os.Open(filepath.Join("testdata", "profiles", tt.pth))
 			require.NoError(t, err)
 
 			b, err := io.ReadAll(f)
