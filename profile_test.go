@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/bitrise-io/go-xcode/profileutil"
@@ -123,8 +122,4 @@ func TestProfileInfoModel(t *testing.T) {
 			require.Equal(t, tt.wantPlatform, infoModel.ListingPlatform)
 		})
 	}
-}
-
-func platformToType(platform string) profileutil.ProfileType {
-	return profileutil.ProfileType(strings.ToLower(platform))
 }
