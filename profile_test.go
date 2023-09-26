@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTypeOf(t *testing.T) {
+func TestProfileInfoModel(t *testing.T) {
 	tests := []struct {
 		name         string
 		pth          string
