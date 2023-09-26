@@ -12,12 +12,14 @@ import (
 
 // CertificateInfoModel ...
 type CertificateInfoModel struct {
-	CommonName string    `json:"CommonName,omitempty"`
-	TeamName   string    `json:"TeamName,omitempty"`
-	TeamID     string    `json:"TeamID,omitempty"`
-	Serial     string    `json:"Serial,omitempty"`
-	EndDate    time.Time `json:"EndDate"`
-	StartDate  time.Time `json:"StartDate"`
+	CommonName      string                     `json:"CommonName,omitempty"`
+	TeamName        string                     `json:"TeamName,omitempty"`
+	TeamID          string                     `json:"TeamID,omitempty"`
+	Serial          string                     `json:"Serial,omitempty"`
+	EndDate         time.Time                  `json:"EndDate"`
+	StartDate       time.Time                  `json:"StartDate"`
+	ListingType     CertificateListingType     `json:"ListingType"`
+	ListingPlatform CertificateListingPlatform `json:"ListingPlatform"`
 }
 
 func handleCertificate(w http.ResponseWriter, r *http.Request) {
@@ -62,13 +64,18 @@ func certificateToJSON(data []byte, password string) (string, error) {
 func certsToCertModels(certs []certificateutil.CertificateInfoModel) []CertificateInfoModel {
 	var certModels []CertificateInfoModel
 	for _, cert := range certs {
+		certType := certificateType(cert)
+		listingType, listingPlatform := certificatesTypeToListingTypes(certType)
+
 		certModels = append(certModels, CertificateInfoModel{
-			CommonName: cert.CommonName,
-			TeamName:   cert.TeamName,
-			TeamID:     cert.TeamID,
-			EndDate:    cert.EndDate,
-			StartDate:  cert.StartDate,
-			Serial:     cert.Serial,
+			CommonName:      cert.CommonName,
+			TeamName:        cert.TeamName,
+			TeamID:          cert.TeamID,
+			EndDate:         cert.EndDate,
+			StartDate:       cert.StartDate,
+			Serial:          cert.Serial,
+			ListingType:     listingType,
+			ListingPlatform: listingPlatform,
 		})
 	}
 	return certModels
