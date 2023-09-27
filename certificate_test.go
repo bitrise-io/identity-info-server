@@ -78,14 +78,14 @@ func Test_certsToCertModels(t *testing.T) {
 		{
 			name:         "Apple Push Notification service SSL Sandbox",
 			pth:          "Apple_Push_Notification_service_SSL_Sandbox.json",
-			wantType:     "",
-			wantPlatform: "",
+			wantType:     "Apple Sandbox Push Services",
+			wantPlatform: "unknown",
 		},
 		{
 			name:         "Pass Type ID Certificate",
 			pth:          "Pass_Type_ID_Certificate.json",
-			wantType:     "",
-			wantPlatform: "",
+			wantType:     "Pass Type ID",
+			wantPlatform: "unknown",
 		},
 	}
 	for _, tt := range tests {
