@@ -6,8 +6,10 @@ import (
 	"github.com/bitrise-io/go-xcode/certificateutil"
 )
 
+// CertificateListingType ...
 type CertificateListingType string
 
+// CertificateListingTypes ...
 const (
 	AppleDevelopmentCertificateListingType  CertificateListingType = "Development"
 	AppleDistributionCertificateListingType CertificateListingType = "Distribution"
@@ -22,16 +24,20 @@ const (
 	DeveloperIDInstallerCertificateListingType              CertificateListingType = "Developer ID Installer"
 )
 
+// CertificateListingPlatform ...
 type CertificateListingPlatform string
 
+// CertificateListingPlatforms ...
 const (
 	IOSCertificateListingPlatform   CertificateListingPlatform = "iOS"
 	MacOSCertificateListingPlatform CertificateListingPlatform = "macOS"
 	AllCertificateListingPlatform   CertificateListingPlatform = "all"
 )
 
+// CertificateType ...
 type CertificateType string
 
+// CertificateType ...
 const (
 	AppleDevelopment  CertificateType = "Apple Development"
 	AppleDistribution CertificateType = "Apple Distribution"
