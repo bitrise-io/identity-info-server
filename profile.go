@@ -24,6 +24,7 @@ const (
 	TVOSDAppStoreListingType          ProfileListingType = "tvOS App Store"
 	TVOSEnterpriseListingType         ProfileListingType = "tvOS Enterprise"
 	DeveloperIDApplicationListingType ProfileListingType = "Developer ID Application"
+	UnknownProfileListingType         ProfileListingType = "unknown"
 )
 
 // ProfileListingPlatform is the Provisioning Profile platform to be used when listing profiles.
@@ -31,8 +32,9 @@ type ProfileListingPlatform string
 
 // ProfileListingPlatforms ...
 const (
-	IOSListingPlatform   ProfileListingPlatform = "iOS"
-	MacOSListingPlatform ProfileListingPlatform = "macOS"
+	IOSListingPlatform     ProfileListingPlatform = "iOS"
+	MacOSListingPlatform   ProfileListingPlatform = "macOS"
+	UnknownListingPlatform ProfileListingPlatform = "unknown"
 )
 
 // ProvisioningProfileInfoModel ...
@@ -91,9 +93,19 @@ func profileToJSON(data []byte) (string, error) {
 }
 
 func profileToProfileModel(profile profileutil.ProvisioningProfileInfoModel) ProvisioningProfileInfoModel {
-	profileType := getProfileType(profile)
-	profilePlatform := profile.Type
-	listingType, listingPlatform := profileTypesToListingTypes(profileType, profilePlatform)
+	listingType := UnknownProfileListingType
+	listingPlatform := UnknownListingPlatform
+
+	profileType, err := getProfileType(profile)
+	if err != nil {
+		logWaring(err.Error())
+	} else {
+		profilePlatform := profile.Type
+		listingType, listingPlatform, err = profileTypesToListingTypes(profileType, profilePlatform)
+		if err != nil {
+			logWaring(err.Error())
+		}
+	}
 
 	return ProvisioningProfileInfoModel{
 		UUID:                  profile.UUID,

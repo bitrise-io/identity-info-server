@@ -1,21 +1,26 @@
 package main
 
-import "github.com/bitrise-io/go-xcode/profileutil"
+import (
+	"fmt"
+
+	"github.com/bitrise-io/go-xcode/profileutil"
+)
 
 // ProfileType ...
 type ProfileType string
 
 // ProfileTypes ...
 const (
-	Development ProfileType = "Development"
-	AdHoc       ProfileType = "Ad hoc"
-	AppStore    ProfileType = "App Store"
-	DeveloperID ProfileType = "Developer ID"
-	Enterprise  ProfileType = "Enterprise"
+	DevelopmentProfileType ProfileType = "Development"
+	AdHocProfileType       ProfileType = "Ad hoc"
+	AppStoreProfileType    ProfileType = "App Store"
+	DeveloperIDProfileType ProfileType = "Developer ID"
+	EnterpriseProfileType  ProfileType = "Enterprise"
+	UnknownProfileType     ProfileType = "unknown"
 )
 
 // getProfileType returns the type (ProfileType) based on the provided provisioning profile content.
-func getProfileType(profile profileutil.ProvisioningProfileInfoModel) ProfileType {
+func getProfileType(profile profileutil.ProvisioningProfileInfoModel) (ProfileType, error) {
 	/*
 		| macOS        | ProvisionedDevices | ProvisionsAllDevices
 		|--------------|--------------------|----------------------|
@@ -41,14 +46,13 @@ func getProfileType(profile profileutil.ProvisioningProfileInfoModel) ProfileTyp
 	if isMacOS && !isIOS {
 		switch {
 		case hasProvisionedDevices && !provisionsAllDevices:
-			return Development
+			return DevelopmentProfileType, nil
 		case !hasProvisionedDevices && provisionsAllDevices:
-			return DeveloperID
+			return DeveloperIDProfileType, nil
 		case !hasProvisionedDevices && !provisionsAllDevices:
-			return AppStore
+			return AppStoreProfileType, nil
 		default:
-			// TODO: this shouldn't happen
-			return Development
+			return UnknownProfileType, fmt.Errorf("unkown profile type: hasProvisionedDevices: %v, provisionsAllDevices: %v, isMacOS: %v, isIOS: %v", hasProvisionedDevices, provisionsAllDevices, isMacOS, isIOS)
 		}
 	}
 
@@ -59,21 +63,20 @@ func getProfileType(profile profileutil.ProvisioningProfileInfoModel) ProfileTyp
 
 	switch {
 	case hasProvisionedDevices && !provisionsAllDevices && getTaskAllow:
-		return Development
+		return DevelopmentProfileType, nil
 	case hasProvisionedDevices && !provisionsAllDevices && !getTaskAllow:
-		return AdHoc
+		return AdHocProfileType, nil
 	case !hasProvisionedDevices && provisionsAllDevices && !getTaskAllow:
-		return Enterprise
+		return EnterpriseProfileType, nil
 	case !hasProvisionedDevices && !provisionsAllDevices && !getTaskAllow:
-		return AppStore
+		return AppStoreProfileType, nil
 	default:
-		// TODO: this shouldn't happen
-		return Development
+		return UnknownProfileType, fmt.Errorf("unkown profile type: hasProvisionedDevices: %v, provisionsAllDevices: %v, isMacOS: %v, isIOS: %v, getTaskAllow: %v", hasProvisionedDevices, provisionsAllDevices, isMacOS, isIOS, getTaskAllow)
 	}
 }
 
 // profileTypesToListingTypes maps profile type and platform to the type and platform should be used when listing profiles.
-func profileTypesToListingTypes(profileType ProfileType, profilePlatform profileutil.ProfileType) (ProfileListingType, ProfileListingPlatform) {
+func profileTypesToListingTypes(profileType ProfileType, profilePlatform profileutil.ProfileType) (ProfileListingType, ProfileListingPlatform, error) {
 	mappedPlatform := IOSListingPlatform
 	if profilePlatform == profileutil.ProfileTypeMacOs {
 		mappedPlatform = MacOSListingPlatform
@@ -81,40 +84,35 @@ func profileTypesToListingTypes(profileType ProfileType, profilePlatform profile
 
 	var mappedType ProfileListingType
 	switch profileType {
-	case Development:
+	case DevelopmentProfileType:
 		if profilePlatform == profileutil.ProfileTypeTvOs {
 			mappedType = TVOSDevelopmentListingType
 		} else {
 			mappedType = DevelopmentListingType
 		}
-	case AdHoc:
+	case AdHocProfileType:
 		if profilePlatform == profileutil.ProfileTypeTvOs {
 			mappedType = TVOSAdHocListingType
 		} else {
 			mappedType = AdHocListingType
 		}
-	case AppStore:
+	case AppStoreProfileType:
 		if profilePlatform == profileutil.ProfileTypeTvOs {
 			mappedType = TVOSDAppStoreListingType
 		} else {
 			mappedType = AppStoreListingType
 		}
-	case Enterprise:
+	case EnterpriseProfileType:
 		if profilePlatform == profileutil.ProfileTypeTvOs {
 			mappedType = TVOSEnterpriseListingType
 		} else {
 			mappedType = EnterpriseListingType
 		}
-	case DeveloperID:
+	case DeveloperIDProfileType:
 		mappedType = DeveloperIDApplicationListingType
 	default:
-		// TODO: this shouldn't happen
-		if profilePlatform == profileutil.ProfileTypeTvOs {
-			mappedType = TVOSDevelopmentListingType
-		} else {
-			mappedType = DevelopmentListingType
-		}
+		return UnknownProfileListingType, mappedPlatform, fmt.Errorf("unkown profile type: %s", profileType)
 	}
 
-	return mappedType, mappedPlatform
+	return mappedType, mappedPlatform, nil
 }

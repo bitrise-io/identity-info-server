@@ -69,6 +69,10 @@ func logCritical(f string, v ...interface{}) {
 	fmt.Printf("[!] Exception: %s\n", fmt.Sprintf(f, v...))
 }
 
+func logWaring(f string, v ...interface{}) {
+	fmt.Printf("Warning: %s\n", fmt.Sprintf(f, v...))
+}
+
 func isValidURL(reqURL string) bool {
 	_, err := url.ParseRequestURI(reqURL)
 	return err == nil
