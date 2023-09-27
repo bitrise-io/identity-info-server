@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bitrise-io/go-xcode/certificateutil"
@@ -22,6 +23,7 @@ const (
 	ThirdPartyMacDeveloperInstallerCertificateListingType   CertificateListingType = "Mac Installer Distribution"
 	DeveloperIDApplicationCertificateListingType            CertificateListingType = "Developer ID Application"
 	DeveloperIDInstallerCertificateListingType              CertificateListingType = "Developer ID Installer"
+	UnknownCertificateListingType                           CertificateListingType = "unknown"
 )
 
 // CertificateListingPlatform ...
@@ -29,9 +31,10 @@ type CertificateListingPlatform string
 
 // CertificateListingPlatforms ...
 const (
-	IOSCertificateListingPlatform   CertificateListingPlatform = "iOS"
-	MacOSCertificateListingPlatform CertificateListingPlatform = "macOS"
-	AllCertificateListingPlatform   CertificateListingPlatform = "all"
+	IOSCertificateListingPlatform     CertificateListingPlatform = "iOS"
+	MacOSCertificateListingPlatform   CertificateListingPlatform = "macOS"
+	AllCertificateListingPlatform     CertificateListingPlatform = "all"
+	UnknownCertificateListingPlatform CertificateListingPlatform = "unknown"
 )
 
 // CertificateType ...
@@ -50,6 +53,7 @@ const (
 	ThirdPartyMacDeveloperInstaller   CertificateType = "3rd Party Mac Developer Installer"
 	DeveloperIDApplication            CertificateType = "Developer ID Application"
 	DeveloperIDInstaller              CertificateType = "Developer ID Installer"
+	UnknownCertificateType            CertificateType = "unknown"
 )
 
 var knownSoftwareCertificateTypes = map[CertificateType]bool{
@@ -64,45 +68,43 @@ var knownSoftwareCertificateTypes = map[CertificateType]bool{
 	DeveloperIDInstaller:              true,
 }
 
-func certificateType(cert certificateutil.CertificateInfoModel) CertificateType {
+func certificateType(cert certificateutil.CertificateInfoModel) (CertificateType, error) {
 	split := strings.Split(cert.CommonName, ":")
 	if len(split) < 2 {
-		// TODO: this shouldn't happen
-		return ""
+		return UnknownCertificateType, fmt.Errorf("couldn't parse certificate type from common name: %s", cert.CommonName)
 	}
 
 	typeFromName := split[0]
-	ok := knownSoftwareCertificateTypes[CertificateType(typeFromName)]
-	if !ok {
-		// TODO: this should mean a Certificate for services (like Pass Type ID Certificate)
-		return CertificateType("")
-	}
+	//ok := knownSoftwareCertificateTypes[CertificateType(typeFromName)]
+	//if !ok {
+	//	// TODO: this should mean a Certificate for services (like Pass Type ID Certificate)
+	//	return typeFromName, nil
+	//}
 
-	return CertificateType(typeFromName)
+	return CertificateType(typeFromName), nil
 }
 
-func certificatesTypeToListingTypes(certificateType CertificateType) (CertificateListingType, CertificateListingPlatform) {
+func certificatesTypeToListingTypes(certificateType CertificateType) (CertificateListingType, CertificateListingPlatform, error) {
 	switch certificateType {
 	case AppleDevelopment:
-		return AppleDevelopmentCertificateListingType, AllCertificateListingPlatform
+		return AppleDevelopmentCertificateListingType, AllCertificateListingPlatform, nil
 	case AppleDistribution:
-		return AppleDistributionCertificateListingType, AllCertificateListingPlatform
+		return AppleDistributionCertificateListingType, AllCertificateListingPlatform, nil
 	case iPhoneDeveloper:
-		return iPhoneDeveloperCertificateListingType, IOSCertificateListingPlatform
+		return iPhoneDeveloperCertificateListingType, IOSCertificateListingPlatform, nil
 	case iPhoneDistribution:
-		return iPhoneDistributionCertificateListingType, IOSCertificateListingPlatform
+		return iPhoneDistributionCertificateListingType, IOSCertificateListingPlatform, nil
 	case MacDeveloper:
-		return MacDeveloperCertificateListingType, MacOSCertificateListingPlatform
+		return MacDeveloperCertificateListingType, MacOSCertificateListingPlatform, nil
 	case ThirdPartyMacDeveloperApplication:
-		return ThirdPartyMacDeveloperApplicationCertificateListingType, MacOSCertificateListingPlatform
+		return ThirdPartyMacDeveloperApplicationCertificateListingType, MacOSCertificateListingPlatform, nil
 	case ThirdPartyMacDeveloperInstaller:
-		return ThirdPartyMacDeveloperInstallerCertificateListingType, MacOSCertificateListingPlatform
+		return ThirdPartyMacDeveloperInstallerCertificateListingType, MacOSCertificateListingPlatform, nil
 	case DeveloperIDApplication:
-		return DeveloperIDApplicationCertificateListingType, MacOSCertificateListingPlatform
+		return DeveloperIDApplicationCertificateListingType, MacOSCertificateListingPlatform, nil
 	case DeveloperIDInstaller:
-		return DeveloperIDInstallerCertificateListingType, MacOSCertificateListingPlatform
+		return DeveloperIDInstallerCertificateListingType, MacOSCertificateListingPlatform, nil
 	default:
-		// TODO: this shouldn't happen
-		return "", ""
+		return CertificateListingType(certificateType), UnknownCertificateListingPlatform, fmt.Errorf("unknown certificate type: %s", certificateType)
 	}
 }

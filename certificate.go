@@ -64,8 +64,18 @@ func certificateToJSON(data []byte, password string) (string, error) {
 func certsToCertModels(certs []certificateutil.CertificateInfoModel) []CertificateInfoModel {
 	var certModels []CertificateInfoModel
 	for _, cert := range certs {
-		certType := certificateType(cert)
-		listingType, listingPlatform := certificatesTypeToListingTypes(certType)
+		listingType := UnknownCertificateListingType
+		listingPlatform := UnknownCertificateListingPlatform
+
+		certType, err := certificateType(cert)
+		if err != nil {
+			logWaring(err.Error())
+		} else {
+			listingType, listingPlatform, err = certificatesTypeToListingTypes(certType)
+			if err != nil {
+				logWaring(err.Error())
+			}
+		}
 
 		certModels = append(certModels, CertificateInfoModel{
 			CommonName:      cert.CommonName,
