@@ -56,18 +56,6 @@ const (
 	UnknownCertificateType            CertificateType = "unknown"
 )
 
-var knownSoftwareCertificateTypes = map[CertificateType]bool{
-	AppleDevelopment:                  true,
-	AppleDistribution:                 true,
-	iPhoneDeveloper:                   true,
-	iPhoneDistribution:                true,
-	MacDeveloper:                      true,
-	ThirdPartyMacDeveloperApplication: true,
-	ThirdPartyMacDeveloperInstaller:   true,
-	DeveloperIDApplication:            true,
-	DeveloperIDInstaller:              true,
-}
-
 func certificateType(cert certificateutil.CertificateInfoModel) (CertificateType, error) {
 	split := strings.Split(cert.CommonName, ":")
 	if len(split) < 2 {
@@ -75,12 +63,6 @@ func certificateType(cert certificateutil.CertificateInfoModel) (CertificateType
 	}
 
 	typeFromName := split[0]
-	//ok := knownSoftwareCertificateTypes[CertificateType(typeFromName)]
-	//if !ok {
-	//	// TODO: this should mean a Certificate for services (like Pass Type ID Certificate)
-	//	return typeFromName, nil
-	//}
-
 	return CertificateType(typeFromName), nil
 }
 
