@@ -58,14 +58,6 @@ var knownSoftwareCertificateTypes = map[CertificateType]bool{
 	DeveloperIDInstaller:              true,
 }
 
-type CertificatePlatform string
-
-const (
-	IOS   CertificatePlatform = "iOS"
-	MacOS CertificatePlatform = "macOS"
-	All   CertificatePlatform = "All"
-)
-
 func certificateType(cert certificateutil.CertificateInfoModel) CertificateType {
 	split := strings.Split(cert.CommonName, ":")
 	if len(split) < 2 {
@@ -81,21 +73,6 @@ func certificateType(cert certificateutil.CertificateInfoModel) CertificateType 
 	}
 
 	return CertificateType(typeFromName)
-}
-
-func certificatePlatform(cert certificateutil.CertificateInfoModel) CertificatePlatform {
-	t := certificateType(cert)
-	switch t {
-	case AppleDevelopment, AppleDistribution:
-		return All
-	case iPhoneDeveloper, iPhoneDistribution:
-		return IOS
-	case MacDeveloper, ThirdPartyMacDeveloperApplication, ThirdPartyMacDeveloperInstaller, DeveloperIDApplication, DeveloperIDInstaller:
-		return MacOS
-	}
-
-	// TODO: this should mean a Certificate for services (like Pass Type ID Certificate)
-	return ""
 }
 
 func certificatesTypeToListingTypes(certificateType CertificateType) (CertificateListingType, CertificateListingPlatform) {
