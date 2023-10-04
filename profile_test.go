@@ -8,6 +8,7 @@ import (
 
 	"github.com/bitrise-io/go-xcode/profileutil"
 	"github.com/fullsailor/pkcs7"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -117,7 +118,8 @@ func TestProfileInfoModel(t *testing.T) {
 			profile, err := profileutil.NewProvisioningProfileInfo(pkcs7Profile)
 			require.NotNil(t, profile)
 
-			infoModel := profileToProfileModel(profile)
+			s := Service{Logger: log.New()}
+			infoModel := s.profileToProfileModel(profile)
 			require.Equal(t, tt.wantType, infoModel.ListingType)
 			require.Equal(t, tt.wantPlatform, infoModel.ListingPlatform)
 		})

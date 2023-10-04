@@ -22,37 +22,37 @@ type CertificateInfoModel struct {
 	ListingPlatform CertificateListingPlatform `json:"ListingPlatform"`
 }
 
-func handleCertificate(w http.ResponseWriter, r *http.Request) {
+func (s Service) HandleCertificate(w http.ResponseWriter, r *http.Request) {
 	data, err := getRequestModel(r)
 	if err != nil {
-		errorResponse(w, "Failed to decrypt request body, error: %s", err)
+		s.errorResponse(w, "Failed to decrypt request body, error: %s", err)
 		return
 	}
 
-	certsJSON, err := certificateToJSON(data.Data, string(data.Password))
+	certsJSON, err := s.certificateToJSON(data.Data, string(data.Password))
 	if err != nil {
 		if err == pkcs12.ErrIncorrectPassword {
-			errorResponseWithType(w, err, "invalid_password")
+			s.errorResponseWithType(w, err, "invalid_password")
 			return
 		}
-		errorResponse(w, "Failed to get certificate info, error: %s", err)
+		s.errorResponse(w, "Failed to get certificate info, error: %s", err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	if _, err = w.Write([]byte(certsJSON)); err != nil {
-		logCritical("Failed to write response, error: %+v", err)
+		s.Logger.Errorf("Failed to write response, error: %+v", err)
 	}
 }
 
-func certificateToJSON(data []byte, password string) (string, error) {
+func (s Service) certificateToJSON(data []byte, password string) (string, error) {
 	password = strings.TrimSuffix(password, "\n")
 	certs, err := certificateutil.CertificatesFromPKCS12Content(data, password)
 	if err != nil {
 		return "", err
 	}
 
-	certModels := certsToCertModels(certs)
+	certModels := s.certsToCertModels(certs)
 	b, err := json.Marshal(certModels)
 	if err != nil {
 		return "", err
@@ -61,7 +61,7 @@ func certificateToJSON(data []byte, password string) (string, error) {
 	return string(b), nil
 }
 
-func certsToCertModels(certs []certificateutil.CertificateInfoModel) []CertificateInfoModel {
+func (s Service) certsToCertModels(certs []certificateutil.CertificateInfoModel) []CertificateInfoModel {
 	var certModels []CertificateInfoModel
 	for _, cert := range certs {
 		listingType := UnknownCertificateListingType
@@ -69,11 +69,11 @@ func certsToCertModels(certs []certificateutil.CertificateInfoModel) []Certifica
 
 		certType, err := certificateType(cert)
 		if err != nil {
-			logWaring(err.Error())
+			s.Logger.Warn(err)
 		} else {
 			listingType, listingPlatform, err = certificatesTypeToListingTypes(certType)
 			if err != nil {
-				logWaring(err.Error())
+				s.Logger.Warn(err)
 			}
 		}
 

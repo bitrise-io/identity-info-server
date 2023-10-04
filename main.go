@@ -1,10 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 	"os"
 
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/DataDog/dd-trace-go.v1/contrib/gorilla/mux"
 	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
@@ -15,14 +15,19 @@ func main() {
 	tracer.Start()
 	defer tracer.Stop()
 
+	logger := log.New()
+	logger.SetFormatter(&log.JSONFormatter{})
+
+	service := Service{Logger: logger}
+
 	router := mux.NewRouter(mux.WithAnalytics(true)).StrictSlash(true)
-	router.HandleFunc("/certificate", handleCertificate).Methods("POST")
-	router.HandleFunc("/profile", handleProfile).Methods("POST")
-	router.HandleFunc("/keystore", handleKeystore).Methods("POST")
-	router.HandleFunc("/", index).Methods("GET")
+	router.HandleFunc("/certificate", service.HandleCertificate).Methods("POST")
+	router.HandleFunc("/profile", service.HandleProfile).Methods("POST")
+	router.HandleFunc("/keystore", service.HandleKeystore).Methods("POST")
+	router.HandleFunc("/", service.Index).Methods("GET")
 
 	if err := http.ListenAndServe(":"+port, router); err != nil {
-		logCritical("Failed to listen, error: %s", err)
+		logger.Errorf("Failed to listen, error: %s", err)
 		return
 	}
 }
@@ -33,10 +38,4 @@ func getPort() string {
 	}
 
 	return "8080"
-}
-
-func index(w http.ResponseWriter, r *http.Request) {
-	if err := json.NewEncoder(w).Encode(map[string]string{"message": "Welcome!"}); err != nil {
-		logCritical("Failed to write response, error: %+v", err)
-	}
 }
