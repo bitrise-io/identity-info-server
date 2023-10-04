@@ -53,6 +53,7 @@ type ProvisioningProfileInfoModel struct {
 	ExpirationDate        time.Time              `json:"ExpirationDate"`
 }
 
+// HandleProfile ...
 func (s Service) HandleProfile(w http.ResponseWriter, r *http.Request) {
 	data, err := getRequestModel(r)
 	if err != nil {

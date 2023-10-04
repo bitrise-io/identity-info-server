@@ -22,6 +22,7 @@ type CertificateInfoModel struct {
 	ListingPlatform CertificateListingPlatform `json:"ListingPlatform"`
 }
 
+// HandleCertificate ...
 func (s Service) HandleCertificate(w http.ResponseWriter, r *http.Request) {
 	data, err := getRequestModel(r)
 	if err != nil {

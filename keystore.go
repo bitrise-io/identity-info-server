@@ -19,6 +19,7 @@ type CertificateInformation struct {
 	ValidUntil         string `json:"valid_until,omitempty"`
 }
 
+// HandleKeystore ...
 func (s Service) HandleKeystore(w http.ResponseWriter, r *http.Request) {
 	reqModel, err := getRequestModel(r)
 	if err != nil {

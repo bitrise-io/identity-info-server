@@ -8,10 +8,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Service ...
 type Service struct {
 	Logger *log.Logger
 }
 
+// Index ...
 func (s Service) Index(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(map[string]string{"message": "Welcome!"}); err != nil {
 		s.Logger.Errorf("Failed to write response, error: %+v", err)
