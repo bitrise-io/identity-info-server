@@ -37,6 +37,7 @@ func (s Service) HandleKeystore(w http.ResponseWriter, r *http.Request) {
 		case keystore.IncorrectKeyPasswordError:
 			s.errorResponseWithType(w, err, "invalid_key_password")
 		default:
+			s.Logger.Errorf("Failed to get keystore info, error: %s", err)
 			s.errorResponse(w, "Failed to get keystore info, error: %s", err)
 		}
 		return
