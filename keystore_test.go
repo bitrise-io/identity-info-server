@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -55,7 +56,8 @@ func Test_handleKeystore(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			handleKeystore(tt.w, tt.r)
+			s := Service{Logger: log.New()}
+			s.HandleKeystore(tt.w, tt.r)
 			resp := tt.w.Result()
 			defer func() {
 				err := resp.Body.Close()

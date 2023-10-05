@@ -53,26 +53,27 @@ type ProvisioningProfileInfoModel struct {
 	ExpirationDate        time.Time              `json:"ExpirationDate"`
 }
 
-func handleProfile(w http.ResponseWriter, r *http.Request) {
+// HandleProfile ...
+func (s Service) HandleProfile(w http.ResponseWriter, r *http.Request) {
 	data, err := getRequestModel(r)
 	if err != nil {
-		errorResponse(w, "Failed to decrypt request body, error: %s", err)
+		s.errorResponse(w, "Failed to decrypt request body, error: %s", err)
 		return
 	}
 
-	profJSON, err := profileToJSON(data.Data)
+	profJSON, err := s.profileToJSON(data.Data)
 	if err != nil {
-		errorResponse(w, "Failed to get profile info, error: %s", err)
+		s.errorResponse(w, "Failed to get profile info, error: %s", err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	if _, err = w.Write([]byte(profJSON)); err != nil {
-		logCritical("Failed to write response, error: %+v", err)
+		s.Logger.Errorf("Failed to write response, error: %+v", err)
 	}
 }
 
-func profileToJSON(data []byte) (string, error) {
+func (s Service) profileToJSON(data []byte) (string, error) {
 	pkcs7, err := profileutil.ProvisioningProfileFromContent(data)
 	if err != nil {
 		return "", err
@@ -83,7 +84,7 @@ func profileToJSON(data []byte) (string, error) {
 		return "", err
 	}
 
-	profileModel := profileToProfileModel(profile)
+	profileModel := s.profileToProfileModel(profile)
 	b, err := json.Marshal(profileModel)
 	if err != nil {
 		return "", err
@@ -92,18 +93,18 @@ func profileToJSON(data []byte) (string, error) {
 	return string(b), nil
 }
 
-func profileToProfileModel(profile profileutil.ProvisioningProfileInfoModel) ProvisioningProfileInfoModel {
+func (s Service) profileToProfileModel(profile profileutil.ProvisioningProfileInfoModel) ProvisioningProfileInfoModel {
 	listingType := UnknownProfileListingType
 	listingPlatform := UnknownListingPlatform
 
 	profileType, err := getProfileType(profile)
 	if err != nil {
-		logWaring(err.Error())
+		s.Logger.Warn(err)
 	} else {
 		profilePlatform := profile.Type
 		listingType, listingPlatform, err = profileTypesToListingTypes(profileType, profilePlatform)
 		if err != nil {
-			logWaring(err.Error())
+			s.Logger.Warn(err)
 		}
 	}
 
@@ -117,7 +118,7 @@ func profileToProfileModel(profile profileutil.ProvisioningProfileInfoModel) Pro
 		ListingType:           listingType,
 		ListingPlatform:       listingPlatform,
 		ProvisionedDevices:    profile.ProvisionedDevices,
-		DeveloperCertificates: certsToCertModels(profile.DeveloperCertificates),
+		DeveloperCertificates: s.certsToCertModels(profile.DeveloperCertificates),
 		Entitlements:          profile.Entitlements,
 		ExpirationDate:        profile.ExpirationDate,
 	}

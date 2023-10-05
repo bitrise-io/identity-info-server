@@ -7,6 +7,7 @@ require (
 	github.com/bitrise-io/go-pkcs12 v0.0.0-20230913085202-b40653eb06c7
 	github.com/bitrise-io/go-xcode v1.0.16
 	github.com/fullsailor/pkcs7 v0.0.0-20190404230743-d7302db945fa
+	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/DataDog/dd-trace-go.v1 v1.27.1
 )

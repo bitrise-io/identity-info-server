@@ -19,10 +19,11 @@ type CertificateInformation struct {
 	ValidUntil         string `json:"valid_until,omitempty"`
 }
 
-func handleKeystore(w http.ResponseWriter, r *http.Request) {
+// HandleKeystore ...
+func (s Service) HandleKeystore(w http.ResponseWriter, r *http.Request) {
 	reqModel, err := getRequestModel(r)
 	if err != nil {
-		errorResponse(w, "Failed to decrypt request body, error: %s", err)
+		s.errorResponse(w, "Failed to decrypt request body, error: %s", err)
 		return
 	}
 
@@ -30,20 +31,21 @@ func handleKeystore(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case keystore.IncorrectKeystorePasswordError:
-			errorResponseWithType(w, err, "invalid_password")
+			s.errorResponseWithType(w, err, "invalid_password")
 		case keystore.IncorrectAliasError:
-			errorResponseWithType(w, err, "invalid_alias")
+			s.errorResponseWithType(w, err, "invalid_alias")
 		case keystore.IncorrectKeyPasswordError:
-			errorResponseWithType(w, err, "invalid_key_password")
+			s.errorResponseWithType(w, err, "invalid_key_password")
 		default:
-			errorResponse(w, "Failed to get keystore info, error: %s", err)
+			s.Logger.Errorf("Failed to get keystore info, error: %s", err)
+			s.errorResponse(w, "Failed to get keystore info, error: %s", err)
 		}
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	if _, err = w.Write([]byte(keystoreJSON)); err != nil {
-		logCritical("Failed to write response, error: %+v", err)
+		s.Logger.Errorf("Failed to write response, error: %+v", err)
 	}
 }
 

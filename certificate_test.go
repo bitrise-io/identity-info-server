@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/bitrise-io/go-xcode/certificateutil"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -95,7 +96,8 @@ func Test_certsToCertModels(t *testing.T) {
 
 			x509Cert := newCertFromJSON(t, f)
 			cert := certificateutil.NewCertificateInfo(*x509Cert, nil)
-			certModels := certsToCertModels([]certificateutil.CertificateInfoModel{cert})
+			s := Service{Logger: log.New()}
+			certModels := s.certsToCertModels([]certificateutil.CertificateInfoModel{cert})
 			certModel := certModels[0]
 			require.Equal(t, tt.wantType, certModel.ListingType)
 			require.Equal(t, tt.wantPlatform, certModel.ListingPlatform)
