@@ -53,6 +53,12 @@ func Test_handleKeystore(t *testing.T) {
 			r:            httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "debug.keystore", "android", "androiddebugkey", "android"))),
 			expectedResp: `{"first_and_last_name":"Android Debug","organization":"Android","country_code":"US","valid_from":"2022-06-22 09:57:21 +0000 UTC","valid_until":"2052-06-14 09:57:21 +0000 UTC"}`,
 		},
+		{
+			name:         "Keystore with upper case letters in the alias",
+			w:            httptest.NewRecorder(),
+			r:            httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "upper_case_alias_keystore.pkcs12", "keystore", "MyKey", "keystore"))),
+			expectedResp: `{"organization":"Bitrise","valid_from":"2024-01-31 14:08:42 +0000 UTC","valid_until":"2049-01-24 14:08:42 +0000 UTC"}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -1,8 +1,8 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DataDog/datadog-go v4.2.0+incompatible h1:Q73jzyKHwyA04Gf4SSukRF+KR4wJEimU6tAuU0B8Y4Y=
 github.com/DataDog/datadog-go v4.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/bitrise-io/go-android/v2 v2.0.0-alpha.5 h1:iQ6ZEOzsetZXGyUeiYqdtZH7N5xWdzJCaIudsjgmyAQ=
-github.com/bitrise-io/go-android/v2 v2.0.0-alpha.5/go.mod h1:Pln+erEcilflYfDmPloEKrziXD/Ba336xZZTe78ojCY=
+github.com/bitrise-io/go-android/v2 v2.0.0-alpha.6 h1:hWROpNco1KxpvNl2xGwIut4rlL2qoKbdX1X1WtOpKyE=
+github.com/bitrise-io/go-android/v2 v2.0.0-alpha.6/go.mod h1:Pln+erEcilflYfDmPloEKrziXD/Ba336xZZTe78ojCY=
 github.com/bitrise-io/go-pkcs12 v0.0.0-20230913085202-b40653eb06c7 h1:UgbAP2//OniQV9K5tHg7jnPfSYAy5ujXyH6E7L7CTBQ=
 github.com/bitrise-io/go-pkcs12 v0.0.0-20230913085202-b40653eb06c7/go.mod h1:fly5xmzjteedkhq4NJiEFbtC6KjvFdNeFxaTw2yF//k=
 github.com/bitrise-io/go-steputils v1.0.2/go.mod h1:YIUaQnIAyK4pCvQG0hYHVkSzKNT9uL2FWmkFNW4mfNI=
