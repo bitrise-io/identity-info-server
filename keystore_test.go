@@ -59,6 +59,18 @@ func Test_handleKeystore(t *testing.T) {
 			r:            httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "upper_case_alias_keystore.pkcs12", "keystore", "MyKey", "keystore"))),
 			expectedResp: `{"organization":"Bitrise","valid_from":"2024-01-31 14:08:42 +0000 UTC","valid_until":"2049-01-24 14:08:42 +0000 UTC"}`,
 		},
+		{
+			name:         "Keystore with multiple keys - key0",
+			w:            httptest.NewRecorder(),
+			r:            httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "multiple_keys_keystore.pkcs12", "storepass", "key0", "keypass0"))),
+			expectedResp: `{"organization":"Bitrise","valid_from":"2024-11-18 14:41:36 +0000 UTC","valid_until":"2025-11-18 14:41:36 +0000 UTC"}`,
+		},
+		{
+			name:         "Keystore with multiple keys - key1",
+			w:            httptest.NewRecorder(),
+			r:            httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "multiple_keys_keystore.pkcs12", "storepass", "key1", "keypass1"))),
+			expectedResp: `{"organization":"Bitrise","valid_from":"2024-11-18 14:43:38 +0000 UTC","valid_until":"2025-11-18 14:43:38 +0000 UTC"}`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
