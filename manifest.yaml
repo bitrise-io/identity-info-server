@@ -3,10 +3,10 @@ replicaCount: 2
 
 global:
   service:
-    name: "identity-info"
+    name: identity-info
 
   version: local
-  team: "platform"
+  team: platform
 
 env: ""
   # - name: TEST

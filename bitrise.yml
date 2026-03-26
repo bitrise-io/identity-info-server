@@ -10,34 +10,33 @@ app:
 workflows:
   deploy:
     steps:
-      - git::https://github.com/bitrise-io/build-env@master:
-          title: Set up environment
-          run_if: $.IsCI
-          inputs:
-            - SERVICE_NAME: $SERVICE_NAME
-            - GCLOUD_KEY: $GCLOUD_KEY
-            - GKE_CLUSTER: website
+    - git::https://github.com/bitrise-io/build-env@master:
+        title: Set up environment
+        run_if: $.IsCI
+        inputs:
+        - SERVICE_NAME: $SERVICE_NAME
+        - GCLOUD_KEY: $GCLOUD_KEY
+        - GKE_CLUSTER: website
+    - script:
+        title: Build image
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
 
-      - script:
-          title: Build image
-          inputs:
-            - content: |
-                #!/bin/bash
-                set -ex
-
-                docker build . -t $SERVICE_IMAGE_ID
-                docker push $SERVICE_IMAGE_ID
-      - script:
-          title: Deploy service to Kubernetes
-          inputs:
-            - content: |
-                #!/bin/bash
-                set -ex
-                helm upgrade --install --atomic $SERVICE_NAME main/api-service --set image.name=$SERVICE_IMAGE_ID -f ./manifest.yaml -n website-services
+            docker build . -t $SERVICE_IMAGE_ID
+            docker push $SERVICE_IMAGE_ID
+    - script:
+        title: Deploy service to Kubernetes
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            helm upgrade --install --atomic $SERVICE_NAME main/api-service --set image.name=$SERVICE_IMAGE_ID -f ./manifest.yaml -n website-services
 
   ci:
     after_run:
-      - test
+    - test
 
   test:
     envs:
@@ -49,57 +48,9 @@ workflows:
     - TEST_CERTIFICATE_URL: $TEST_CERTIFICATE_URL
     - TEST_CERTIFICATE_URL_PASSWORD: $TEST_CERTIFICATE_URL_PASSWORD
     steps:
-    - script:
-        run_if: $.IsCI
+    - git::https://github.com/bitrise-steplib/steps-check.git@master:
         inputs:
-        - content: |-
-            set -eox pipefail
-            GO_INSTALL=go$GO_VERSION.linux-amd64.tar.gz
-            
-            # remove existing go
-            rm -rf /usr/local/go
-            
-            # download new one
-            curl -s https://dl.google.com/go/$GO_INSTALL -o $GO_INSTALL
-            
-            # extract it
-            tar -C /usr/local -xzf $GO_INSTALL
-            
-            # remove install file
-            rm $GO_INSTALL
-            
-            #version
-            go version
-            
-            go env GO111MODULE
-            # Support GOPATH Steps with old (1.44) Bitirse CLI
-            go env -w GO111MODULE=auto
-            
-            go install github.com/kisielk/errcheck@latest
-            go install golang.org/x/lint/golint@latest
-    - script:
-        title: Linting
-        inputs:
-        - content: |
-            #!/bin/bash
-            set -ex
-            GOLIST_WITHOUT_VENDOR="$(go list ./... | grep -v vendor)"
-            go vet $GOLIST_WITHOUT_VENDOR
-            errcheck -asserts=true -blank=true $GOLIST_WITHOUT_VENDOR
-
-            # lint
-            while read -r line; do
-              echo "-> Linting: $line"
-              golint -set_exit_status $line
-            done <<< "$GOLIST_WITHOUT_VENDOR"
-    - script:
-        title: Unit tests
-        inputs:
-        - content: |
-            #!/bin/bash
-            set -ex
-            go test -v -cover -race -coverprofile=coverage.txt -covermode=atomic ./...
-
+        - skip_step_yml_validation: "yes"
 
   up:
     steps:

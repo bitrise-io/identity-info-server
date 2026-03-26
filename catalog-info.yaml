@@ -1,8 +1,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: "code-sign-identity-info"
-  description: "code-sign-identity-info"
+  name: code-sign-identity-info
+  description: code-sign-identity-info
   annotations:
     gcp.bitrise.io/dev-project-id: ip-release-automation-dev
     gcp.bitrise.io/dev-service-account: code-sign-identity-info@ip-release-automation-dev.iam.gserviceaccount.com
@@ -11,9 +11,7 @@ metadata:
 spec:
   type: service
   lifecycle: experimental
-  owner: "release-automation-engineers"
-  system: "release-automation"
+  owner: release-automation-engineers
+  system: release-automation
   dependsOn:
     []
-    
-
