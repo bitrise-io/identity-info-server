@@ -32,7 +32,7 @@ func (s Service) HandleKeystore(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, keystore.InvalidKeystoreFileError):
-			s.Logger.Infof("Invalid keystore file: %s", err)
+			s.Logger.Errorf("Invalid keystore file: %s", err)
 			s.errorResponseWithType(w, keystore.InvalidKeystoreFileError, "invalid_file")
 		case errors.Is(err, keystore.IncorrectKeystorePasswordError):
 			s.errorResponseWithType(w, err, "invalid_password")
