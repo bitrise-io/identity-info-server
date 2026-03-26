@@ -116,6 +116,7 @@ func TestProfileInfoModel(t *testing.T) {
 			pkcs7Profile.Content = b
 
 			profile, err := profileutil.NewProvisioningProfileInfo(pkcs7Profile)
+			require.NoError(t, err)
 			require.NotNil(t, profile)
 
 			s := Service{Logger: log.New()}
