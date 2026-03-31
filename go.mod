@@ -3,7 +3,7 @@ module github.com/bitrise-io/identity-info-server
 go 1.22
 
 require (
-	github.com/bitrise-io/go-android/v2 v2.0.0-alpha.15.0.20260326091119-54205ab79bc9
+	github.com/bitrise-io/go-android/v2 v2.0.0-alpha.16
 	github.com/bitrise-io/go-pkcs12 v0.1.0
 	github.com/bitrise-io/go-xcode v1.0.16
 	github.com/fullsailor/pkcs7 v0.0.0-20190404230743-d7302db945fa

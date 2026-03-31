@@ -1,7 +1,7 @@
 github.com/DataDog/datadog-go v4.2.0+incompatible h1:Q73jzyKHwyA04Gf4SSukRF+KR4wJEimU6tAuU0B8Y4Y=
 github.com/DataDog/datadog-go v4.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/bitrise-io/go-android/v2 v2.0.0-alpha.15.0.20260326091119-54205ab79bc9 h1:zDYqaSej8gP+ZE73Ka2ILxK6hK9dkZ7yuGYcTAK5tmI=
-github.com/bitrise-io/go-android/v2 v2.0.0-alpha.15.0.20260326091119-54205ab79bc9/go.mod h1:+Cm0XgGA/50c4Xlsm8MBHgLYFVFj46sHW6G2/dwDBQI=
+github.com/bitrise-io/go-android/v2 v2.0.0-alpha.16 h1:F5VR5heDotUsWajCleVMoooEAynW5l7f6WEAaF0JKFk=
+github.com/bitrise-io/go-android/v2 v2.0.0-alpha.16/go.mod h1:+Cm0XgGA/50c4Xlsm8MBHgLYFVFj46sHW6G2/dwDBQI=
 github.com/bitrise-io/go-pkcs12 v0.1.0 h1:J8mViCXJVRdav5ZSPp47Esz7XP1wW3T3BFz+NgdJsq8=
 github.com/bitrise-io/go-pkcs12 v0.1.0/go.mod h1:fly5xmzjteedkhq4NJiEFbtC6KjvFdNeFxaTw2yF//k=
 github.com/bitrise-io/go-utils v1.0.15 h1:KRQjNiPrkxBRM6G5fQy05v0p0r8wycWfKVb+Ko+Vtg0=
