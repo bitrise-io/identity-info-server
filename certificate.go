@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -32,7 +33,7 @@ func (s Service) HandleCertificate(w http.ResponseWriter, r *http.Request) {
 
 	certsJSON, err := s.certificateToJSON(data.Data, string(data.Password))
 	if err != nil {
-		if err == pkcs12.ErrIncorrectPassword {
+		if errors.Is(err, pkcs12.ErrIncorrectPassword) {
 			s.errorResponseWithType(w, err, "invalid_password")
 			return
 		}

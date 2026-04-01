@@ -3,8 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
@@ -49,7 +47,7 @@ func TestEndpoints(t *testing.T) {
 
 	t.Log("/profile from file")
 	{
-		fileData, err := ioutil.ReadFile(testProfilePath)
+		fileData, err := os.ReadFile(testProfilePath)
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
@@ -61,13 +59,10 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		req, err := http.NewRequest("POST", "http://localhost:"+testingPort+"/profile", bytes.NewReader(b.Bytes()))
+		require.NoError(t, err)
+
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
-
-		//bodyBytes, err := ioutil.ReadAll(resp.Body)
-		require.NoError(t, err)
-		//fmt.Printf(string(bodyBytes))
-
 		require.Equal(t, 200, resp.StatusCode)
 	}
 
@@ -82,19 +77,16 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		req, err := http.NewRequest("POST", "http://localhost:"+testingPort+"/profile", bytes.NewReader(b.Bytes()))
+		require.NoError(t, err)
+
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
-
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		require.NoError(t, err)
-		fmt.Printf(string(bodyBytes))
-
 		require.Equal(t, 200, resp.StatusCode)
 	}
 
 	t.Log("/certificate - without password")
 	{
-		fileData, err := ioutil.ReadFile(testNoPWCertificatePath)
+		fileData, err := os.ReadFile(testNoPWCertificatePath)
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
@@ -106,13 +98,10 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		req, err := http.NewRequest("POST", "http://localhost:"+testingPort+"/certificate", bytes.NewReader(b.Bytes()))
+		require.NoError(t, err)
+
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
-
-		//bodyBytes, err := ioutil.ReadAll(resp.Body)
-		require.NoError(t, err)
-		//fmt.Printf(string(bodyBytes))
-
 		require.Equal(t, 200, resp.StatusCode)
 	}
 
@@ -127,19 +116,16 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		req, err := http.NewRequest("POST", "http://localhost:"+testingPort+"/certificate", bytes.NewReader(b.Bytes()))
+		require.NoError(t, err)
+
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
-
-		//bodyBytes, err := ioutil.ReadAll(resp.Body)
-		require.NoError(t, err)
-		//fmt.Printf(string(bodyBytes))
-
 		require.Equal(t, 200, resp.StatusCode)
 	}
 
 	t.Log("/certificate - with password")
 	{
-		fileData, err := ioutil.ReadFile(testCertificatePath)
+		fileData, err := os.ReadFile(testCertificatePath)
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
@@ -151,19 +137,16 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		req, err := http.NewRequest("POST", "http://localhost:"+testingPort+"/certificate", bytes.NewReader(b.Bytes()))
+		require.NoError(t, err)
+
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
-
-		//bodyBytes, err := ioutil.ReadAll(resp.Body)
-		require.NoError(t, err)
-		//fmt.Printf(string(bodyBytes))
-
 		require.Equal(t, 200, resp.StatusCode)
 	}
 
 	t.Log("/certificate - with WRONG password")
 	{
-		fileData, err := ioutil.ReadFile(testCertificatePath)
+		fileData, err := os.ReadFile(testCertificatePath)
 		require.NoError(t, err)
 
 		reqModel := RequestModel{
@@ -176,13 +159,10 @@ func TestEndpoints(t *testing.T) {
 		require.NoError(t, err)
 
 		req, err := http.NewRequest("POST", "http://localhost:"+testingPort+"/certificate", bytes.NewReader(b.Bytes()))
+		require.NoError(t, err)
+
 		resp, err := (&http.Client{}).Do(req)
 		require.NoError(t, err)
-
-		//bodyBytes, err := ioutil.ReadAll(resp.Body)
-		require.NoError(t, err)
-		//fmt.Printf(string(bodyBytes))
-
 		require.Equal(t, 400, resp.StatusCode)
 	}
 }

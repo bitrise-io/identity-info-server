@@ -22,12 +22,10 @@ func Test_handleKeystore(t *testing.T) {
 		expectedResp string
 	}{
 		{
-			name: "Invalid file",
-			w:    httptest.NewRecorder(),
-			r:    httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "empty_file", "", "", ""))),
-			expectedResp: `{"error":"Failed to get keystore info, error: failed to decode keystore:
-- pkcs12: error reading P12 data: asn1: syntax error: sequence truncated
-- unexpected EOF at position 0 while reading magic header"}`,
+			name:         "Invalid file",
+			w:            httptest.NewRecorder(),
+			r:            httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, "empty_file", "", "", ""))),
+			expectedResp: `{"error":"invalid keystore file", "error_type":"invalid_file"}`,
 		},
 		{
 			name:         "Invalid keystore password",

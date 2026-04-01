@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/bitrise-io/go-android/v2/keystore"
@@ -29,12 +30,15 @@ func (s Service) HandleKeystore(w http.ResponseWriter, r *http.Request) {
 
 	keystoreJSON, err := keystoreToJSON(reqModel.Data, string(reqModel.Password), string(reqModel.Alias), string(reqModel.KeyPassword))
 	if err != nil {
-		switch err {
-		case keystore.IncorrectKeystorePasswordError:
+		switch {
+		case errors.Is(err, keystore.InvalidKeystoreFileError):
+			s.Logger.Errorf("Invalid keystore file: %s", err)
+			s.errorResponseWithType(w, keystore.InvalidKeystoreFileError, "invalid_file")
+		case errors.Is(err, keystore.IncorrectKeystorePasswordError):
 			s.errorResponseWithType(w, err, "invalid_password")
-		case keystore.IncorrectAliasError:
+		case errors.Is(err, keystore.IncorrectAliasError):
 			s.errorResponseWithType(w, err, "invalid_alias")
-		case keystore.IncorrectKeyPasswordError:
+		case errors.Is(err, keystore.IncorrectKeyPasswordError):
 			s.errorResponseWithType(w, err, "invalid_key_password")
 		default:
 			s.Logger.Errorf("Failed to get keystore info, error: %s", err)
