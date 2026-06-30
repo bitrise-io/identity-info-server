@@ -2,12 +2,16 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
@@ -82,9 +86,78 @@ func Test_handleKeystore(t *testing.T) {
 
 			data, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
-			require.Equal(t, tt.expectedResp, string(data))
+
+			if resp.StatusCode != http.StatusOK {
+				// Error responses are returned verbatim and are unaffected by the new fields.
+				require.Equal(t, tt.expectedResp, string(data))
+				return
+			}
+
+			var got, want CertificateInformation
+			require.NoError(t, json.Unmarshal(data, &got))
+			require.NoError(t, json.Unmarshal([]byte(tt.expectedResp), &want))
+
+			// The new fields are always present in a successful response.
+			require.NotNil(t, got.FileSHA256)
+			require.Regexp(t, `^[0-9a-f]{64}$`, *got.FileSHA256)
+			require.NotNil(t, got.CertificateSHA256Fingerprint)
+			require.Regexp(t, `^([0-9A-F]{2}:){31}[0-9A-F]{2}$`, *got.CertificateSHA256Fingerprint)
+
+			// All previously existing fields must be unchanged. `want` is decoded from the
+			// pre-existing expected JSON (which has no new fields), so comparing after clearing
+			// the new fields verifies the existing behavior is intact.
+			got.FileSHA256 = nil
+			got.CertificateSHA256Fingerprint = nil
+			require.Equal(t, want, got)
 		})
 	}
+}
+
+func Test_keystoreContentMetadata(t *testing.T) {
+	const (
+		fileName    = "debug.keystore"
+		pass        = "android"
+		alias       = "androiddebugkey"
+		keyPassword = "android"
+	)
+
+	fileBytes, err := os.ReadFile(filepath.Join("testdata", "keystores", fileName))
+	require.NoError(t, err)
+
+	r := httptest.NewRequest(http.MethodPost, "/keystore", bytes.NewReader(createRequestData(t, fileName, pass, alias, keyPassword)))
+	w := httptest.NewRecorder()
+
+	s := Service{Logger: log.New()}
+	s.HandleKeystore(w, r)
+
+	resp := w.Result()
+	defer func() {
+		require.NoError(t, resp.Body.Close())
+	}()
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+
+	data, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+
+	var got CertificateInformation
+	require.NoError(t, json.Unmarshal(data, &got))
+
+	// file_sha256 is the lowercase hex SHA-256 of the uploaded file bytes.
+	fileSum := sha256.Sum256(fileBytes)
+	require.NotNil(t, got.FileSHA256)
+	require.Equal(t, hex.EncodeToString(fileSum[:]), *got.FileSHA256)
+
+	// certificate_sha256_fingerprint is the signing cert's SHA-256 in keytool format
+	// (uppercase, colon-separated hex).
+	cert, err := keystoreSigningCertificate(fileBytes, pass, alias, keyPassword)
+	require.NoError(t, err)
+	certSum := sha256.Sum256(cert.Raw)
+	expectedParts := make([]string, len(certSum))
+	for i, b := range certSum {
+		expectedParts[i] = fmt.Sprintf("%02X", b)
+	}
+	require.NotNil(t, got.CertificateSHA256Fingerprint)
+	require.Equal(t, strings.Join(expectedParts, ":"), *got.CertificateSHA256Fingerprint)
 }
 
 func createRequestData(t *testing.T, testFileName string, pass, alias, keyPass string) []byte {

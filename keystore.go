@@ -1,9 +1,13 @@
 package main
 
 import (
+	"crypto/sha256"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/bitrise-io/go-android/v2/keystore"
 )
@@ -18,6 +22,13 @@ type CertificateInformation struct {
 	CountryCode        string `json:"country_code,omitempty"`
 	ValidFrom          string `json:"valid_from,omitempty"`
 	ValidUntil         string `json:"valid_until,omitempty"`
+
+	// CertificateSHA256Fingerprint is the SHA-256 fingerprint of the signing certificate in keytool
+	// format: uppercase hex, colon-separated (e.g. "AB:CD:EF:..."). It is null when the fingerprint
+	// cannot be determined.
+	CertificateSHA256Fingerprint *string `json:"certificate_sha256_fingerprint"`
+	// FileSHA256 is the SHA-256 of the uploaded file bytes as lowercase hex.
+	FileSHA256 *string `json:"file_sha256"`
 }
 
 // HandleKeystore ...
@@ -61,12 +72,48 @@ func keystoreToJSON(data []byte, password, alias, keyPassword string) (string, e
 	}
 
 	certModel := convertCertificateInformation(certInfo)
+
+	// The file SHA-256 is always computable from the uploaded bytes.
+	fileSHA256 := sha256Hex(data)
+	certModel.FileSHA256 = &fileSHA256
+
+	// The certificate fingerprint is best effort: ReadCertificateInformation does not expose the
+	// raw certificate, so we decode it again to compute the fingerprint. Decoding already succeeded
+	// above, so this should succeed too; if it does not, the fingerprint is left null.
+	if cert, err := keystoreSigningCertificate(data, password, alias, keyPassword); err == nil {
+		fingerprint := sha256Fingerprint(cert)
+		certModel.CertificateSHA256Fingerprint = &fingerprint
+	}
+
 	b, err := json.Marshal(certModel)
 	if err != nil {
 		return "", err
 	}
 
 	return string(b), nil
+}
+
+// keystoreSigningCertificate decodes the keystore and returns the signing certificate.
+// It mirrors the decoders used by keystore.NewDefaultReader.
+func keystoreSigningCertificate(data []byte, password, alias, keyPassword string) (*x509.Certificate, error) {
+	decoders := []keystore.Decoder{keystore.PKCS12KeystoreDecoder{}, keystore.JKSKeystoreDecoder{}}
+	for _, decoder := range decoders {
+		if _, cert, err := decoder.Decode(data, password, alias, keyPassword); err == nil && cert != nil {
+			return cert, nil
+		}
+	}
+	return nil, fmt.Errorf("could not decode certificate from keystore")
+}
+
+// sha256Fingerprint returns the SHA-256 fingerprint of the certificate in keytool format:
+// uppercase hex, colon-separated (e.g. "AB:CD:EF:...").
+func sha256Fingerprint(cert *x509.Certificate) string {
+	sum := sha256.Sum256(cert.Raw)
+	parts := make([]string, len(sum))
+	for i, b := range sum {
+		parts[i] = fmt.Sprintf("%02X", b)
+	}
+	return strings.Join(parts, ":")
 }
 
 func convertCertificateInformation(certInfo *keystore.CertificateInformation) CertificateInformation {

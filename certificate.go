@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -21,6 +22,17 @@ type CertificateInfoModel struct {
 	StartDate       time.Time                  `json:"StartDate"`
 	ListingType     CertificateListingType     `json:"ListingType"`
 	ListingPlatform CertificateListingPlatform `json:"ListingPlatform"`
+
+	// CertificateSerial is the X.509 serial number as uppercase hexadecimal (e.g. "0A1B2C3D4E5F6071").
+	// It is null when the serial number cannot be determined.
+	CertificateSerial *string `json:"certificate_serial"`
+	// CertificateExpiryDate is the certificate notAfter date in RFC 3339 / ISO 8601 UTC.
+	// It is null when the expiry date cannot be determined.
+	CertificateExpiryDate *time.Time `json:"certificate_expiry_date"`
+	// FileSHA256 is the SHA-256 of the uploaded file bytes as lowercase hex.
+	// It is null for certificates that are not backed by an uploaded file (e.g. certificates
+	// embedded in a provisioning profile).
+	FileSHA256 *string `json:"file_sha256"`
 }
 
 // HandleCertificate ...
@@ -54,7 +66,8 @@ func (s Service) certificateToJSON(data []byte, password string) (string, error)
 		return "", err
 	}
 
-	certModels := s.certsToCertModels(certs)
+	fileSHA256 := sha256Hex(data)
+	certModels := s.certsToCertModels(certs, &fileSHA256)
 	b, err := json.Marshal(certModels)
 	if err != nil {
 		return "", err
@@ -63,7 +76,10 @@ func (s Service) certificateToJSON(data []byte, password string) (string, error)
 	return string(b), nil
 }
 
-func (s Service) certsToCertModels(certs []certificateutil.CertificateInfoModel) []CertificateInfoModel {
+// certsToCertModels maps the parsed certificates to response models.
+// fileSHA256 is the SHA-256 of the uploaded file the certificates were extracted from; pass nil
+// for certificates that do not originate from an uploaded file (e.g. profile-embedded certificates).
+func (s Service) certsToCertModels(certs []certificateutil.CertificateInfoModel, fileSHA256 *string) []CertificateInfoModel {
 	var certModels []CertificateInfoModel
 	for _, cert := range certs {
 		listingType := UnknownCertificateListingType
@@ -79,7 +95,7 @@ func (s Service) certsToCertModels(certs []certificateutil.CertificateInfoModel)
 			}
 		}
 
-		certModels = append(certModels, CertificateInfoModel{
+		model := CertificateInfoModel{
 			CommonName:      cert.CommonName,
 			TeamName:        cert.TeamName,
 			TeamID:          cert.TeamID,
@@ -88,7 +104,20 @@ func (s Service) certsToCertModels(certs []certificateutil.CertificateInfoModel)
 			Serial:          cert.Serial,
 			ListingType:     listingType,
 			ListingPlatform: listingPlatform,
-		})
+			FileSHA256:      fileSHA256,
+		}
+
+		if cert.Certificate.SerialNumber != nil {
+			serialHex := strings.ToUpper(hex.EncodeToString(cert.Certificate.SerialNumber.Bytes()))
+			model.CertificateSerial = &serialHex
+		}
+
+		if !cert.Certificate.NotAfter.IsZero() {
+			expiry := cert.Certificate.NotAfter.UTC()
+			model.CertificateExpiryDate = &expiry
+		}
+
+		certModels = append(certModels, model)
 	}
 	return certModels
 }

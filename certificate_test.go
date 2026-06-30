@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/json"
 	"io"
 	"math/big"
@@ -14,6 +15,58 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
+
+func Test_certsToCertModels_contentMetadata(t *testing.T) {
+	notAfter := time.Date(2027, 5, 28, 0, 0, 0, 0, time.UTC)
+	// Serial bytes 0x0A1B2C3D4E5F6071 must render as uppercase, byte-aligned hex.
+	serial := new(big.Int).SetBytes([]byte{0x0A, 0x1B, 0x2C, 0x3D, 0x4E, 0x5F, 0x60, 0x71})
+
+	x509Cert := x509.Certificate{
+		Subject:      pkix.Name{CommonName: "Apple Development: Test User (ABCDE12345)"},
+		NotBefore:    notAfter.Add(-24 * time.Hour),
+		NotAfter:     notAfter,
+		SerialNumber: serial,
+	}
+	cert := certificateutil.NewCertificateInfo(x509Cert, nil)
+
+	fileHash := "0123456789abcdef"
+	s := Service{Logger: log.New()}
+	models := s.certsToCertModels([]certificateutil.CertificateInfoModel{cert}, &fileHash)
+	require.Len(t, models, 1)
+	model := models[0]
+
+	require.NotNil(t, model.CertificateSerial)
+	require.Equal(t, "0A1B2C3D4E5F6071", *model.CertificateSerial)
+
+	require.NotNil(t, model.CertificateExpiryDate)
+	require.Equal(t, notAfter, *model.CertificateExpiryDate)
+
+	require.NotNil(t, model.FileSHA256)
+	require.Equal(t, fileHash, *model.FileSHA256)
+
+	// The existing decimal Serial field must be preserved alongside the new hex field.
+	require.Equal(t, serial.String(), model.Serial)
+}
+
+func Test_certsToCertModels_nilFileSHA256(t *testing.T) {
+	// Certificates embedded in a profile have no backing uploaded file.
+	x509Cert := x509.Certificate{
+		Subject:      pkix.Name{CommonName: "Apple Development: Test User (ABCDE12345)"},
+		NotAfter:     time.Date(2027, 5, 28, 0, 0, 0, 0, time.UTC),
+		SerialNumber: big.NewInt(42),
+	}
+	cert := certificateutil.NewCertificateInfo(x509Cert, nil)
+
+	s := Service{Logger: log.New()}
+	models := s.certsToCertModels([]certificateutil.CertificateInfoModel{cert}, nil)
+	require.Len(t, models, 1)
+
+	require.Nil(t, models[0].FileSHA256)
+	// Serial and expiry are intrinsic to the certificate and still populated.
+	require.NotNil(t, models[0].CertificateSerial)
+	require.Equal(t, "2A", *models[0].CertificateSerial)
+	require.NotNil(t, models[0].CertificateExpiryDate)
+}
 
 func Test_certsToCertModels(t *testing.T) {
 	tests := []struct {
@@ -97,7 +150,7 @@ func Test_certsToCertModels(t *testing.T) {
 			x509Cert := newCertFromJSON(t, f)
 			cert := certificateutil.NewCertificateInfo(*x509Cert, nil)
 			s := Service{Logger: log.New()}
-			certModels := s.certsToCertModels([]certificateutil.CertificateInfoModel{cert})
+			certModels := s.certsToCertModels([]certificateutil.CertificateInfoModel{cert}, nil)
 			certModel := certModels[0]
 			require.Equal(t, tt.wantType, certModel.ListingType)
 			require.Equal(t, tt.wantPlatform, certModel.ListingPlatform)

@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -53,4 +55,10 @@ func getRequestModel(r *http.Request) (RequestModel, error) {
 func isValidURL(reqURL string) bool {
 	_, err := url.ParseRequestURI(reqURL)
 	return err == nil
+}
+
+// sha256Hex returns the SHA-256 of the given bytes as a lowercase hex string.
+func sha256Hex(data []byte) string {
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:])
 }
