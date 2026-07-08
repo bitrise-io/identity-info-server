@@ -52,11 +52,6 @@ type ProvisioningProfileInfoModel struct {
 	Entitlements          plistutil.PlistData    `json:"Entitlements,omitempty"`
 	ExpirationDate        time.Time              `json:"ExpirationDate"`
 
-	// ProfileUUID is the provisioning profile UUID. It is null when the UUID cannot be determined.
-	ProfileUUID *string `json:"uuid"`
-	// ExpiryDate is the profile ExpirationDate in RFC 3339 / ISO 8601 UTC.
-	// It is null when the expiry date cannot be determined.
-	ExpiryDate *time.Time `json:"expiry_date"`
 	// FileSHA256 is the SHA-256 of the uploaded file bytes as lowercase hex.
 	FileSHA256 *string `json:"file_sha256"`
 }
@@ -119,7 +114,7 @@ func (s Service) profileToProfileModel(profile profileutil.ProvisioningProfileIn
 		}
 	}
 
-	model := ProvisioningProfileInfoModel{
+	return ProvisioningProfileInfoModel{
 		UUID:                  profile.UUID,
 		Name:                  profile.Name,
 		TeamName:              profile.TeamName,
@@ -134,16 +129,4 @@ func (s Service) profileToProfileModel(profile profileutil.ProvisioningProfileIn
 		ExpirationDate:        profile.ExpirationDate,
 		FileSHA256:            fileSHA256,
 	}
-
-	if profile.UUID != "" {
-		uuid := profile.UUID
-		model.ProfileUUID = &uuid
-	}
-
-	if !profile.ExpirationDate.IsZero() {
-		expiry := profile.ExpirationDate.UTC()
-		model.ExpiryDate = &expiry
-	}
-
-	return model
 }

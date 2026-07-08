@@ -127,7 +127,7 @@ func TestProfileInfoModel(t *testing.T) {
 	}
 }
 
-func Test_profileToProfileModel_contentMetadata(t *testing.T) {
+func Test_profileToProfileModel_fileSHA256(t *testing.T) {
 	f, err := os.Open(filepath.Join("testdata", "profiles", "iOS_App_Development.plist"))
 	require.NoError(t, err)
 
@@ -144,17 +144,12 @@ func Test_profileToProfileModel_contentMetadata(t *testing.T) {
 	s := Service{Logger: log.New()}
 	model := s.profileToProfileModel(profile, &fileHash)
 
-	require.NotNil(t, model.ProfileUUID)
-	require.Equal(t, profile.UUID, *model.ProfileUUID)
-	require.NotEmpty(t, *model.ProfileUUID)
-
-	require.NotNil(t, model.ExpiryDate)
-	require.Equal(t, profile.ExpirationDate.UTC(), *model.ExpiryDate)
-
 	require.NotNil(t, model.FileSHA256)
 	require.Equal(t, fileHash, *model.FileSHA256)
 
-	// Existing fields are preserved.
+	// The existing UUID and ExpirationDate fields are preserved unchanged; consumers read those
+	// directly instead of duplicated fields.
+	require.NotEmpty(t, model.UUID)
 	require.Equal(t, profile.UUID, model.UUID)
 	require.Equal(t, profile.ExpirationDate, model.ExpirationDate)
 }

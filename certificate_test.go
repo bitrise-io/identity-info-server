@@ -16,10 +16,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_certsToCertModels_contentMetadata(t *testing.T) {
+func Test_certsToCertModels_fileSHA256(t *testing.T) {
 	notAfter := time.Date(2027, 5, 28, 0, 0, 0, 0, time.UTC)
-	// Serial bytes 0x0A1B2C3D4E5F6071 must render as uppercase, byte-aligned hex.
-	serial := new(big.Int).SetBytes([]byte{0x0A, 0x1B, 0x2C, 0x3D, 0x4E, 0x5F, 0x60, 0x71})
+	serial := big.NewInt(42)
 
 	x509Cert := x509.Certificate{
 		Subject:      pkix.Name{CommonName: "Apple Development: Test User (ABCDE12345)"},
@@ -35,21 +34,17 @@ func Test_certsToCertModels_contentMetadata(t *testing.T) {
 	require.Len(t, models, 1)
 	model := models[0]
 
-	require.NotNil(t, model.CertificateSerial)
-	require.Equal(t, "0A1B2C3D4E5F6071", *model.CertificateSerial)
-
-	require.NotNil(t, model.CertificateExpiryDate)
-	require.Equal(t, notAfter, *model.CertificateExpiryDate)
-
 	require.NotNil(t, model.FileSHA256)
 	require.Equal(t, fileHash, *model.FileSHA256)
 
-	// The existing decimal Serial field must be preserved alongside the new hex field.
+	// The existing serial and expiry fields are preserved unchanged; consumers derive any
+	// alternative representation (e.g. hex serial) from these on the presentation side.
 	require.Equal(t, serial.String(), model.Serial)
+	require.Equal(t, notAfter, model.EndDate)
 }
 
 func Test_certsToCertModels_nilFileSHA256(t *testing.T) {
-	// Certificates embedded in a profile have no backing uploaded file.
+	// Certificates embedded in a profile have no backing uploaded file, so file_sha256 is null.
 	x509Cert := x509.Certificate{
 		Subject:      pkix.Name{CommonName: "Apple Development: Test User (ABCDE12345)"},
 		NotAfter:     time.Date(2027, 5, 28, 0, 0, 0, 0, time.UTC),
@@ -62,10 +57,6 @@ func Test_certsToCertModels_nilFileSHA256(t *testing.T) {
 	require.Len(t, models, 1)
 
 	require.Nil(t, models[0].FileSHA256)
-	// Serial and expiry are intrinsic to the certificate and still populated.
-	require.NotNil(t, models[0].CertificateSerial)
-	require.Equal(t, "2A", *models[0].CertificateSerial)
-	require.NotNil(t, models[0].CertificateExpiryDate)
 }
 
 func Test_certsToCertModels(t *testing.T) {

@@ -77,9 +77,9 @@ func keystoreToJSON(data []byte, password, alias, keyPassword string) (string, e
 	fileSHA256 := sha256Hex(data)
 	certModel.FileSHA256 = &fileSHA256
 
-	// The certificate fingerprint is best effort: ReadCertificateInformation does not expose the
-	// raw certificate, so we decode it again to compute the fingerprint. Decoding already succeeded
-	// above, so this should succeed too; if it does not, the fingerprint is left null.
+	// The certificate fingerprint is best effort. See keystoreSigningCertificate for why the
+	// keystore is decoded a second time here. Decoding already succeeded above, so this should
+	// succeed too; if it does not, the fingerprint is left null.
 	if cert, err := keystoreSigningCertificate(data, password, alias, keyPassword); err == nil {
 		fingerprint := sha256Fingerprint(cert)
 		certModel.CertificateSHA256Fingerprint = &fingerprint
@@ -93,8 +93,24 @@ func keystoreToJSON(data []byte, password, alias, keyPassword string) (string, e
 	return string(b), nil
 }
 
-// keystoreSigningCertificate decodes the keystore and returns the signing certificate.
-// It mirrors the decoders used by keystore.NewDefaultReader.
+// keystoreSigningCertificate decodes the keystore and returns the raw signing certificate so its
+// SHA-256 fingerprint can be computed.
+//
+// This is a known, deliberate workaround, flagged in code review:
+//
+// The fingerprint is a property of the exact certificate that keystore.Reader.ReadCertificateInformation
+// already decodes. That method, however, decodes the keystore, parses the *x509.Certificate into a
+// keystore.CertificateInformation and then discards the raw certificate, so the caller never gets it
+// back. The vendored keystore package exposes no lower-level Reader method that returns the raw
+// certificate. The only public way to obtain it is via the Decoder API, which forces us to both
+// re-declare the same decoder list that keystore.NewDefaultReader uses internally (there is no
+// accessor for a Reader's decoders) and decode the keystore a second time.
+//
+// The proper fix belongs upstream in go-android: ReadCertificateInformation should also return the
+// decoded *x509.Certificate (or the fingerprint), which would let us drop this function and the
+// duplicate decode entirely. That change is out of scope here because the dependency is vendored and
+// must not be modified in this repository. Until it lands, this pragmatic double-decode keeps the
+// fingerprint correct without touching existing keystore error handling.
 func keystoreSigningCertificate(data []byte, password, alias, keyPassword string) (*x509.Certificate, error) {
 	decoders := []keystore.Decoder{keystore.PKCS12KeystoreDecoder{}, keystore.JKSKeystoreDecoder{}}
 	for _, decoder := range decoders {
