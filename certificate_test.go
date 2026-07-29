@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/json"
 	"io"
 	"math/big"
@@ -14,6 +15,49 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
+
+func Test_certsToCertModels_fileSHA256(t *testing.T) {
+	notAfter := time.Date(2027, 5, 28, 0, 0, 0, 0, time.UTC)
+	serial := big.NewInt(42)
+
+	x509Cert := x509.Certificate{
+		Subject:      pkix.Name{CommonName: "Apple Development: Test User (ABCDE12345)"},
+		NotBefore:    notAfter.Add(-24 * time.Hour),
+		NotAfter:     notAfter,
+		SerialNumber: serial,
+	}
+	cert := certificateutil.NewCertificateInfo(x509Cert, nil)
+
+	fileHash := "0123456789abcdef"
+	s := Service{Logger: log.New()}
+	models := s.certsToCertModels([]certificateutil.CertificateInfoModel{cert}, &fileHash)
+	require.Len(t, models, 1)
+	model := models[0]
+
+	require.NotNil(t, model.FileSHA256)
+	require.Equal(t, fileHash, *model.FileSHA256)
+
+	// The existing serial and expiry fields are preserved unchanged; consumers derive any
+	// alternative representation (e.g. hex serial) from these on the presentation side.
+	require.Equal(t, serial.String(), model.Serial)
+	require.Equal(t, notAfter, model.EndDate)
+}
+
+func Test_certsToCertModels_nilFileSHA256(t *testing.T) {
+	// Certificates embedded in a profile have no backing uploaded file, so file_sha256 is null.
+	x509Cert := x509.Certificate{
+		Subject:      pkix.Name{CommonName: "Apple Development: Test User (ABCDE12345)"},
+		NotAfter:     time.Date(2027, 5, 28, 0, 0, 0, 0, time.UTC),
+		SerialNumber: big.NewInt(42),
+	}
+	cert := certificateutil.NewCertificateInfo(x509Cert, nil)
+
+	s := Service{Logger: log.New()}
+	models := s.certsToCertModels([]certificateutil.CertificateInfoModel{cert}, nil)
+	require.Len(t, models, 1)
+
+	require.Nil(t, models[0].FileSHA256)
+}
 
 func Test_certsToCertModels(t *testing.T) {
 	tests := []struct {
@@ -97,7 +141,7 @@ func Test_certsToCertModels(t *testing.T) {
 			x509Cert := newCertFromJSON(t, f)
 			cert := certificateutil.NewCertificateInfo(*x509Cert, nil)
 			s := Service{Logger: log.New()}
-			certModels := s.certsToCertModels([]certificateutil.CertificateInfoModel{cert})
+			certModels := s.certsToCertModels([]certificateutil.CertificateInfoModel{cert}, nil)
 			certModel := certModels[0]
 			require.Equal(t, tt.wantType, certModel.ListingType)
 			require.Equal(t, tt.wantPlatform, certModel.ListingPlatform)

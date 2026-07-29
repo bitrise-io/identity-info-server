@@ -21,6 +21,11 @@ type CertificateInfoModel struct {
 	StartDate       time.Time                  `json:"StartDate"`
 	ListingType     CertificateListingType     `json:"ListingType"`
 	ListingPlatform CertificateListingPlatform `json:"ListingPlatform"`
+
+	// FileSHA256 is the SHA-256 of the uploaded file bytes as lowercase hex.
+	// It is null for certificates that are not backed by an uploaded file (e.g. certificates
+	// embedded in a provisioning profile).
+	FileSHA256 *string `json:"file_sha256"`
 }
 
 // HandleCertificate ...
@@ -54,7 +59,8 @@ func (s Service) certificateToJSON(data []byte, password string) (string, error)
 		return "", err
 	}
 
-	certModels := s.certsToCertModels(certs)
+	fileSHA256 := sha256Hex(data)
+	certModels := s.certsToCertModels(certs, &fileSHA256)
 	b, err := json.Marshal(certModels)
 	if err != nil {
 		return "", err
@@ -63,7 +69,10 @@ func (s Service) certificateToJSON(data []byte, password string) (string, error)
 	return string(b), nil
 }
 
-func (s Service) certsToCertModels(certs []certificateutil.CertificateInfoModel) []CertificateInfoModel {
+// certsToCertModels maps the parsed certificates to response models.
+// fileSHA256 is the SHA-256 of the uploaded file the certificates were extracted from; pass nil
+// for certificates that do not originate from an uploaded file (e.g. profile-embedded certificates).
+func (s Service) certsToCertModels(certs []certificateutil.CertificateInfoModel, fileSHA256 *string) []CertificateInfoModel {
 	var certModels []CertificateInfoModel
 	for _, cert := range certs {
 		listingType := UnknownCertificateListingType
@@ -88,6 +97,7 @@ func (s Service) certsToCertModels(certs []certificateutil.CertificateInfoModel)
 			Serial:          cert.Serial,
 			ListingType:     listingType,
 			ListingPlatform: listingPlatform,
+			FileSHA256:      fileSHA256,
 		})
 	}
 	return certModels

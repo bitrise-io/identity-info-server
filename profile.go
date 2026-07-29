@@ -51,6 +51,9 @@ type ProvisioningProfileInfoModel struct {
 	DeveloperCertificates []CertificateInfoModel `json:"DeveloperCertificates,omitempty"`
 	Entitlements          plistutil.PlistData    `json:"Entitlements,omitempty"`
 	ExpirationDate        time.Time              `json:"ExpirationDate"`
+
+	// FileSHA256 is the SHA-256 of the uploaded file bytes as lowercase hex.
+	FileSHA256 *string `json:"file_sha256"`
 }
 
 // HandleProfile ...
@@ -84,7 +87,8 @@ func (s Service) profileToJSON(data []byte) (string, error) {
 		return "", err
 	}
 
-	profileModel := s.profileToProfileModel(profile)
+	fileSHA256 := sha256Hex(data)
+	profileModel := s.profileToProfileModel(profile, &fileSHA256)
 	b, err := json.Marshal(profileModel)
 	if err != nil {
 		return "", err
@@ -93,7 +97,9 @@ func (s Service) profileToJSON(data []byte) (string, error) {
 	return string(b), nil
 }
 
-func (s Service) profileToProfileModel(profile profileutil.ProvisioningProfileInfoModel) ProvisioningProfileInfoModel {
+// profileToProfileModel maps the parsed provisioning profile to a response model.
+// fileSHA256 is the SHA-256 of the uploaded profile file; pass nil when it is not available.
+func (s Service) profileToProfileModel(profile profileutil.ProvisioningProfileInfoModel, fileSHA256 *string) ProvisioningProfileInfoModel {
 	listingType := UnknownProfileListingType
 	listingPlatform := UnknownListingPlatform
 
@@ -118,8 +124,9 @@ func (s Service) profileToProfileModel(profile profileutil.ProvisioningProfileIn
 		ListingType:           listingType,
 		ListingPlatform:       listingPlatform,
 		ProvisionedDevices:    profile.ProvisionedDevices,
-		DeveloperCertificates: s.certsToCertModels(profile.DeveloperCertificates),
+		DeveloperCertificates: s.certsToCertModels(profile.DeveloperCertificates, nil),
 		Entitlements:          profile.Entitlements,
 		ExpirationDate:        profile.ExpirationDate,
+		FileSHA256:            fileSHA256,
 	}
 }
