@@ -53,7 +53,7 @@ type ProvisioningProfileInfoModel struct {
 	ExpirationDate        time.Time              `json:"ExpirationDate"`
 
 	// FileSHA256 is the SHA-256 of the uploaded file bytes as lowercase hex.
-	FileSHA256 *string `json:"file_sha256"`
+	FileSHA256 *string `json:"FileSHA256"`
 }
 
 // HandleProfile ...
