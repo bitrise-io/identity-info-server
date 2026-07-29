@@ -25,7 +25,7 @@ type CertificateInfoModel struct {
 	// FileSHA256 is the SHA-256 of the uploaded file bytes as lowercase hex.
 	// It is null for certificates that are not backed by an uploaded file (e.g. certificates
 	// embedded in a provisioning profile).
-	FileSHA256 *string `json:"file_sha256"`
+	FileSHA256 *string `json:"FileSHA256"`
 }
 
 // HandleCertificate ...
