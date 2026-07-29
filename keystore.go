@@ -26,9 +26,9 @@ type CertificateInformation struct {
 	// CertificateSHA256Fingerprint is the SHA-256 fingerprint of the signing certificate in keytool
 	// format: uppercase hex, colon-separated (e.g. "AB:CD:EF:..."). It is null when the fingerprint
 	// cannot be determined.
-	CertificateSHA256Fingerprint *string `json:"CertificateSHA256Fingerprint"`
+	CertificateSHA256Fingerprint *string `json:"certificate_sha256_fingerprint"`
 	// FileSHA256 is the SHA-256 of the uploaded file bytes as lowercase hex.
-	FileSHA256 *string `json:"FileSHA256"`
+	FileSHA256 *string `json:"file_sha256"`
 }
 
 // HandleKeystore ...
